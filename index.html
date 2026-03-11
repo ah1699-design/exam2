@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基本電學 - 抽卡特訓班 (30題連擊版)</title>
+    <style>
+        body {
+            font-family: '微軟正黑體', sans-serif; 
+            background-color: #1a1a2e; 
+            color: #ecf0f1; display: flex; justify-content: center;
+            align-items: center; height: 100vh; margin: 0; overflow: hidden;
+            transition: background-color 0.5s ease; 
+        }
+        
+        body.rescue-mode { background-color: #4a1010; }
+
+        .container {
+            background-color: #2c3e50; width: 90%; max-width: 650px;
+            padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            text-align: center; max-height: 90vh; overflow-y: auto; position: relative;
+        }
+        h1 { color: #f1c40f; margin-bottom: 5px; }
+        .subtitle { color: #95a5a6; margin-bottom: 20px; font-size: 14px; }
+        
+        #student-setup { display: block; }
+        #game-area { display: none; }
+        #result-area { display: none; }
+
+        input[type="text"] {
+            width: 80%; padding: 15px; font-size: 18px; border-radius: 8px; 
+            border: 2px solid #3498db; background: #1a1a2e; color: white; 
+            text-align: center; margin-bottom: 20px;
+        }
+        
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #16213e; padding: 10px 20px; border-radius: 10px; margin-bottom: 20px;
+        }
+        /* 👇 修改了 HP bar 的排版以容納連擊條 👇 */
+        .hp-bar { font-size: 18px; color: #e74c3c; text-align: left; display: flex; align-items: center; gap: 10px;}
+        .streak-badge { background: #d35400; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; }
+        
+        .inventory { font-size: 14px; color: #f1c40f; text-align: right; font-weight: bold;}
+        
+        .tag {
+            display: inline-block; background: #e74c3c; color: white;
+            padding: 5px 10px; border-radius: 5px; font-size: 14px; margin-bottom: 15px; font-weight: bold;
+        }
+        .question-text { font-size: 22px; line-height: 1.5; margin-bottom: 30px; }
+
+        .btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 15px;
+            font-size: 18px; cursor: pointer; border: none; border-radius: 8px;
+            background-color: #34495e; color: white; font-weight: bold; transition: 0.2s; box-shadow: 0 4px #2c3e50;
+        }
+        .btn:hover { background-color: #3498db; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn-start { background-color: #27ae60; box-shadow: 0 4px #1e8449; margin-top: 10px; }
+        .btn-collection { background-color: #8e44ad; box-shadow: 0 4px #732d91; }
+
+        #log-report { text-align: left; background: #1a1a2e; padding: 15px; border-radius: 8px; color: #f39c12; font-size: 16px; margin-bottom: 20px; max-height: 200px; overflow-y: auto;}
+        
+        #correct-splash {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 80px; font-weight: bold; color: #2ecc71; text-shadow: 0 0 30px rgba(46, 204, 113, 0.8);
+            opacity: 0; pointer-events: none; transition: 0.3s; z-index: 150;
+        }
+        #correct-splash.show { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
+
+        #gacha-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; justify-content: center;
+            align-items: center; flex-direction: column; z-index: 200;
+        }
+        .gacha-card {
+            width: 250px; height: 350px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 24px; font-weight: bold; color: white; text-align: center; padding: 20px; box-sizing: border-box; transform: scale(0);
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+        }
+        .card-SP { background: linear-gradient(135deg, #ff00cc, #3333ff); box-shadow: 0 0 50px #ff00cc; border: 3px solid #fff; }
+        .card-UR { background: linear-gradient(135deg, #FFD700, #FF8C00); box-shadow: 0 0 40px #FFD700; border: 3px solid #fff; }
+        .card-SSR { background: linear-gradient(135deg, #ff007f, #7f00ff); box-shadow: 0 0 30px #ff007f; border: 2px solid #fff; }
+        .card-SR { background: linear-gradient(135deg, #00d2ff, #3a7bd5); box-shadow: 0 0 15px #00d2ff; }
+        .card-R { background: linear-gradient(135deg, #7f8c8d, #2c3e50); }
+        .card-N { background: linear-gradient(135deg, #bdc3c7, #7f8c8d); color: #2c3e50; border: 1px solid #95a5a6; }
+        
+        .gacha-title { color: white; font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;}
+        .gacha-btn { margin-top: 30px; padding: 15px 40px; font-size: 20px; font-weight: bold; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px #c0392b; transition: 0.2s;}
+        .gacha-btn:active { transform: translateY(4px); box-shadow: none; }
+        .gacha-btn-collect { background: #3498db; box-shadow: 0 4px #2980b9; }
+
+        #collection-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
+            display: none; justify-content: flex-start; align-items: center; flex-direction: column; z-index: 300; padding-top: 50px; overflow-y: auto;
+        }
+        .collection-header { color: #f1c40f; font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px #f39c12; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 90%; max-width: 800px; padding-bottom: 80px;}
+        .mini-card { background: #2c3e50; border-radius: 10px; padding: 10px; text-align: center; border: 2px solid #34495e; position: relative; }
+        .mini-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
+        .mini-card .name { font-size: 14px; font-weight: bold; color: white; }
+        .mini-card .count { position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px; border: 2px solid #fff; z-index: 10; }
+        
+        .mini-card.unowned { border-color: #555; background: #1a252f; }
+        .mini-card.unowned img { filter: grayscale(100%) brightness(0.4); opacity: 0.6; }
+        .mini-card.unowned .name { color: #7f8c8d; }
+        
+        .btn-synth { margin-top: 8px; padding: 6px 0; font-size: 13px; background: #e67e22; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; animation: pulse 1.5s infinite; }
+        .btn-synth:hover { background: #d35400; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(230, 126, 34, 0); } 100% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0); } }
+        
+        .close-btn { margin-top: 30px; padding: 10px 30px; font-size: 18px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 50px;}
+    </style>
+</head>
+<body>
+
+    <div id="correct-splash">⭕ 正確！</div>
+
+    <div id="gacha-overlay">
+        <div class="gacha-title" id="gacha-title">✨ 連擊達成！獲得抽卡機會！ ✨</div>
+        <button class="gacha-btn" id="pre-draw-btn" onclick="executeDraw()">👉 點擊抽卡 👈</button>
+        <div class="gacha-card" id="revealed-card" style="display:none;">
+            <img id="card-image" src="" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; display: none;">
+            <div id="card-name" style="font-size: 20px; line-height: 1.2;">卡片名稱</div>
+        </div>
+        <button class="gacha-btn gacha-btn-collect" id="post-draw-btn" onclick="closeGacha()" style="display:none;">收下神卡並繼續</button>
+    </div>
+
+    <div id="collection-modal">
+        <div class="collection-header" id="collection-title">🏆 專屬集卡冊</div>
+        <div class="card-grid" id="collection-grid"></div>
+        <button class="close-btn" onclick="closeCollection()">返回首頁</button>
+    </div>
+
+    <div class="container">
+        <div id="student-setup">
+            <h1>🏀 統測特訓：30題不間斷！</h1>
+            <div class="subtitle">連續答對 2 題即可抽卡！<br>(蒐集 5 張相同的 N 卡可融合為隱藏特效卡)</div>
+            <input type="text" id="student-name" placeholder="請輸入 班級+座號+姓名">
+            <button class="btn btn-start" onclick="startGame()">開始 30 題大挑戰</button>
+            <button class="btn btn-collection" onclick="openCollection()">📖 查看我的圖鑑進度</button>
+        </div>
+
+        <div id="game-area">
+            <div class="status-bar">
+                <div class="hp-bar" id="hp-display">
+                    <span id="hearts">❤️❤️❤️</span>
+                    <span class="streak-badge" id="streak-display">🔥 連擊: 0 / 2</span>
+                </div>
+                <div class="inventory" id="inventory-display">🎒 本局卡簿: 空</div>
+            </div>
+            <div class="tag" id="q-tag">標籤</div>
+            <div class="question-text" id="q-text">題目載入中...</div>
+            <div id="options-area"></div>
+        </div>
+
+        <div id="result-area">
+            <h1>測驗完成！🎉</h1>
+            <p>戰利品已自動存入集卡冊，診斷報告已傳送給老師。</p>
+            <div id="log-report"></div>
+            <button class="btn btn-collection" style="margin-top:20px;" onclick="location.reload()">返回首頁查看集卡冊</button>
+        </div>
+    </div>
+
+    <script>
+        // === 音效引擎 ===
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        function initAudio() { 
+            if (!audioCtx) audioCtx = new AudioContext(); 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        }
+        function playSound(type) {
+            initAudio();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if (type === 'correct') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gain.gain.setValueAtTime(0.3, now); osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now); osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'draw') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.5);
+                gain.gain.setValueAtTime(0.2, now); osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'synth') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(300, now); 
+                osc.frequency.linearRampToValueAtTime(600, now + 0.3);
+                osc.frequency.linearRampToValueAtTime(1200, now + 0.6);
+                gain.gain.setValueAtTime(0.4, now); osc.start(now); osc.stop(now + 0.7);
+            }
+        }
+
+        const cardPool = [
+            { id: "c_sp1", name: "【SP】超古代覺醒・裂空座", rarity: "SP", chance: 0, image: "images/SP1.jpg" },
+            { id: "c1", name: "【UR】暗黑・洛奇亞", rarity: "UR", chance: 1, image: "images/UR1.jpg" },
+            { id: "c2", name: "【UR】光明・洛奇亞", rarity: "UR", chance: 1, image: "images/UR2.jpg" },
+            { id: "c3", name: "【UR】光明・鳳王", rarity: "UR", chance: 1, image: "images/UR3.jpg" },
+            { id: "c4", name: "【UR】對戰・鳳王", rarity: "UR", chance: 1, image: "images/UR4.jpg" },
+            { id: "c5", name: "【UR】期間限定・Twice", rarity: "UR", chance: 1, image: "images/UR5.png" },
+            { id: "c6", name: "【SSR】全圖洛奇亞", rarity: "SSR", chance: 2.5, image: "images/SSR1.jpg" },
+            { id: "c7", name: "【SSR】異色洛奇亞", rarity: "SSR", chance: 2.5, image: "images/SSR2.jpg" },
+            { id: "c8", name: "【SSR】浮雕洛奇亞", rarity: "SSR", chance: 2.5, image: "images/SSR3.jpg" },
+            { id: "c9", name: "【SSR】全圖鳳王", rarity: "SSR", chance: 2.5, image: "images/SSR4.jpg" },
+            { id: "c10", name: "【SR】洛奇亞ex", rarity: "SR", chance: 7.5, image: "images/SR1.jpg" },
+            { id: "c11", name: "【SR】鳳王ex", rarity: "SR", chance: 7.5, image: "images/SR2.jpg" },
+            { id: "c12", name: "【R】洛奇亞", rarity: "R", chance: 10, image: "images/R1.jpg" },
+            { id: "c13", name: "【R】鳳王", rarity: "R", chance: 10, image: "images/R2.jpg" },
+            { id: "c14", name: "【N】小山豬", rarity: "N", chance: 7.1, image: "images/N1.jpg" },
+            { id: "c15", name: "【N】阿羅拉小拳石", rarity: "N", chance: 7.1, image: "images/N2.jpg" },
+            { id: "c16", name: "【N】小火龍", rarity: "N", chance: 7.1, image: "images/N3.jpg" },
+            { id: "c17", name: "【N】阿羅拉烏波", rarity: "N", chance: 7.1, image: "images/N4.jpg" },
+            { id: "c18", name: "【N】愛吃豚", rarity: "N", chance: 7.1, image: "images/N5.jpg" },
+            { id: "c19", name: "【N】原野水母", rarity: "N", chance: 7.1, image: "images/N6.jpg" },
+            { id: "c20", name: "【N】光蚵仔", rarity: "N", chance: 7.4, image: "images/N7.jpg" }
+        ];
+
+        // ==========================================
+        // 30 題大補帖 (學科 + 流行文化混合，拿掉單題 triggerGacha)
+        // ==========================================
+        const quizData = {
+            "q1": { tag: "第 1 關：基本電學", text: "在 RLC 串聯電路中，發生「諧振」時，感抗 (XL) 與容抗 (XC) 大小關係為何？", options: [
+                { text: "A. XL = XC (相等)", next: "q2", isCorrect: true }, { text: "B. XL > XC", next: "q1_help", log: "Q1錯" }
+            ]}, "q1_help": { tag: "💊 救援", text: "要互相抵消，大小必須如何？", options: [ { text: "A. 完全相等", next: "q1", isCorrect: true }, { text: "B. 一大一小", next: "q1_help", log: "Q1救錯" } ]},
+            
+            "q2": { tag: "第 2 關：串聯特性", text: "RLC 串聯諧振時，總阻抗 (Z) 與總電流 (I) 的狀態？", options: [
+                { text: "A. 阻抗最小，電流最大", next: "q3", isCorrect: true }, { text: "B. 阻抗最大", next: "q2_help", log: "Q2錯" }
+            ]}, "q2_help": { tag: "💊 救援", text: "抵消後只剩電阻，阻力變小，電流會？", options: [ { text: "A. 最大", next: "q2", isCorrect: true }, { text: "B. 最小", next: "q2_help", log: "Q2救錯" } ]},
+            
+            "q3": { tag: "第 3 關：並聯反轉", text: "RLC「並聯」諧振電路，發生諧振時總阻抗 (Z) 會？", options: [
+                { text: "A. 阻抗最大，電流最小", next: "q4", isCorrect: true }, { text: "B. 阻抗最小", next: "q3_help", log: "Q3錯" }
+            ]}, "q3_help": { tag: "💊 救援", text: "並聯跟串聯相反！阻力變極大，電流會？", options: [ { text: "A. 最小", next: "q3", isCorrect: true }, { text: "B. 最大", next: "q3_help", log: "Q3救錯" } ]},
+            
+            "q4": { tag: "第 4 關：諧振頻率", text: "理想 RLC 電路的「諧振頻率 (fr)」公式為何？", options: [
+                { text: "A. 1 / (2π√LC)", next: "q5", isCorrect: true }, { text: "B. 2π√LC", next: "q4_help", log: "Q4錯" }
+            ]}, "q4_help": { tag: "💊 救援", text: "頻率的 LC 都在哪裡？", options: [ { text: "A. 根號內，分母", next: "q4", isCorrect: true }, { text: "B. 分子", next: "q4_help", log: "Q4救錯" } ]},
+            
+            // 🏐 流行文化 1
+            "q5": { tag: "🎈 第 5 關：動漫放鬆 (排球少年)", text: "在動畫《排球少年》中，日向與影山被稱為「怪人快攻」組合，請問他們所屬的烏野高中代表動物是？", options: [
+                { text: "A. 烏鴉", next: "q6", isCorrect: true }, { text: "B. 貓", next: "q5_help", log: "Q5錯" }, { text: "C. 貓頭鷹", next: "q5_help", log: "Q5錯" }, { text: "D. 狐狸", next: "q5_help", log: "Q5錯" }
+            ]}, "q5_help": { tag: "💊 提示", text: "「烏」野高中的名字裡面，有哪一種鳥類？", options: [ { text: "A. 烏鴉", next: "q5", isCorrect: true }, { text: "B. 企鵝", next: "q5_help", log: "Q5救錯" } ]},
+
+            "q6": { tag: "第 6 關：三相電源", text: "「Y 型 (星型)」接法中，線電壓 (VL) 與相電壓 (VP) 大小關係？", options: [
+                { text: "A. VL = √3 VP", next: "q7", isCorrect: true }, { text: "B. VL = VP", next: "q6_help", log: "Q6錯" }
+            ]}, "q6_help": { tag: "💊 救援", text: "Y型兩火線跨越兩相，電壓會放大多少倍？", options: [ { text: "A. √3倍", next: "q6", isCorrect: true }, { text: "B. 相等", next: "q6_help", log: "Q6救錯" } ]},
+            
+            "q7": { tag: "第 7 關：Y型電流", text: "「Y 型」接法中，線電流 (IL) 與相電流 (IP) 大小關係？", options: [
+                { text: "A. IL = IP (相等)", next: "q8", isCorrect: true }, { text: "B. IL = √3 IP", next: "q7_help", log: "Q7錯" }
+            ]}, "q7_help": { tag: "💊 救援", text: "水管直直通出去沒分岔，所以電流？", options: [ { text: "A. 完全相等", next: "q7", isCorrect: true }, { text: "B. 變大", next: "q7_help", log: "Q7救錯" } ]},
+            
+            "q8": { tag: "第 8 關：Δ 型接法", text: "「Δ 型 (三角)」接法時，電壓與電流特性分別為何？", options: [
+                { text: "A. VL = VP 且 IL = √3 IP", next: "q9", isCorrect: true }, { text: "B. VL = √3 VP", next: "q8_help", log: "Q8錯" }
+            ]}, "q8_help": { tag: "💊 救援", text: "並聯電壓相等，但在節點會分流，所以電流是幾倍？", options: [ { text: "A. √3倍", next: "q8", isCorrect: true }, { text: "B. 3倍", next: "q8_help", log: "Q8救錯" } ]},
+            
+            "q9": { tag: "第 9 關：總功率", text: "實務上用「線電壓 (VL)」與「線電流 (IL)」計算三相總有效功率 (PT)，公式為？", options: [
+                { text: "A. PT = √3 × VL × IL × cosθ", next: "q10", isCorrect: true }, { text: "B. PT = 3 × VL × IL × cosθ", next: "q9_help", log: "Q9錯" }
+            ]}, "q9_help": { tag: "💊 救援", text: "只要公式裡面寫的是「線(L)」，前面的係數必定是多少？", options: [ { text: "A. √3", next: "q9", isCorrect: true }, { text: "B. 3", next: "q9_help", log: "Q9救錯" } ]},
+
+            // 🌟 流行文化 2
+            "q10": { tag: "🌟 第 10 關：動漫放鬆 (JOJO)", text: "在《JOJO的奇妙冒險》第三部中，主角空条承太郎的替身名稱是？", options: [
+                { text: "A. 白金之星", next: "q11", isCorrect: true }, { text: "B. 瘋狂鑽石", next: "q10_help", log: "Q10錯" }, { text: "C. 黃金體驗", next: "q10_help", log: "Q10錯" }, { text: "D. 隱者之紫", next: "q10_help", log: "Q10錯" }
+            ]}, "q10_help": { tag: "💊 提示", text: "他最喜歡喊「歐拉歐拉」，且名字跟星星(Star)有關。", options: [ { text: "A. 白金之星", next: "q10", isCorrect: true }, { text: "B. 瘋狂鑽石", next: "q10_help", log: "Q10救錯" } ]},
+
+            "q11": { tag: "第 11 關：微處理機", text: "現代常見的個人電腦處理器（如 AMD Ryzen）是屬於多少位元的架構？", options: [
+                { text: "A. 64 位元", next: "q12", isCorrect: true }, { text: "B. 32 位元", next: "q11_help", log: "Q11錯" }
+            ]}, "q11_help": { tag: "💊 救援", text: "現在電腦早就超越 32 位元了，是它的兩倍！", options: [ { text: "A. 64", next: "q11", isCorrect: true }, { text: "B. 16", next: "q11_help", log: "Q11救錯" } ]},
+            
+            "q12": { tag: "第 12 關：歷史常識", text: "Intel 從哪一顆處理器開始，正式進入了「32 位元」的時代？", options: [
+                { text: "A. Intel 80386", next: "q13", isCorrect: true }, { text: "B. Intel 8086", next: "q12_help", log: "Q12錯" }
+            ]}, "q12_help": { tag: "💊 救援", text: "口訣：有數字 3 的就是 32 位元起點。", options: [ { text: "A. 80386", next: "q12", isCorrect: true }, { text: "B. 80286", next: "q12_help", log: "Q12救錯" } ]},
+
+            "q13": { tag: "第 13 關：SRAM", text: "關於 SRAM (靜態隨機存取記憶體) 的敘述何者正確？", options: [
+                { text: "A. 每個位元需 6 個電晶體", next: "q14", isCorrect: true }, { text: "B. 需要不斷刷新", next: "q13_help", log: "Q13錯" }
+            ]}, "q13_help": { tag: "💊 救援", text: "它不用充電刷新，由正反器構成，需要幾個電晶體？", options: [ { text: "A. 6個", next: "q13", isCorrect: true }, { text: "B. 1個", next: "q13_help", log: "Q13救錯" } ]},
+
+            "q14": { tag: "第 14 關：位址計算", text: "記憶體起始位址 40000H，讀取 512 K 空間，結束位址為何？", options: [
+                { text: "A. BFFFFH", next: "q15", isCorrect: true }, { text: "B. C0000H", next: "q14_help", log: "Q14錯" }
+            ]}, "q14_help": { tag: "💊 救援", text: "512K = 80000H。結束位址 = 起始 + 容量 - 1。", options: [ { text: "A. BFFFFH", next: "q14", isCorrect: true }, { text: "B. C0000H", next: "q14_help", log: "Q14救錯" } ]},
+
+            // 🏀 流行文化 3
+            "q15": { tag: "🏀 第 15 關：體育時間 (NBA)", text: "NBA 金州勇士隊的當家球星 Stephen Curry 最著名的絕技是？", options: [
+                { text: "A. 超大號三分球", next: "q16", isCorrect: true }, { text: "B. 罰球線起跳灌籃", next: "q15_help", log: "Q15錯" }, { text: "C. 歐洲步上籃", next: "q15_help", log: "Q15錯" }, { text: "D. 禁區天勾", next: "q15_help", log: "Q15錯" }
+            ]}, "q15_help": { tag: "💊 提示", text: "他被稱為史上最強的「三分神射手」。", options: [ { text: "A. 三分球", next: "q15", isCorrect: true }, { text: "B. 灌籃", next: "q15_help", log: "Q15救錯" } ]},
+
+            "q16": { tag: "第 16 關：邏輯元件", text: "PLD 中，哪一種是「AND 固定，只有 OR 可以程式化」？", options: [
+                { text: "A. PROM", next: "q17", isCorrect: true }, { text: "B. PAL", next: "q16_help", log: "Q16錯" }
+            ]}, "q16_help": { tag: "💊 救援", text: "找名字裡面有 O (代表 OR) 的元件！", options: [ { text: "A. PROM", next: "q16", isCorrect: true }, { text: "B. PAL", next: "q16_help", log: "Q16救錯" } ]},
+
+            "q17": { tag: "第 17 關：GAL", text: "哪種裝置是 PAL 改良版，具備 OLMC 且可 EEPROM 重複抹寫？", options: [
+                { text: "A. GAL", next: "q18", isCorrect: true }, { text: "B. PROM", next: "q17_help", log: "Q17錯" }
+            ]}, "q17_help": { tag: "💊 救援", text: "字首 G 代表 Generic (通用)。", options: [ { text: "A. GAL", next: "q17", isCorrect: true }, { text: "B. PLA", next: "q17_help", log: "Q17救錯" } ]},
+
+            "q18": { tag: "第 18 關：位元遮罩", text: "組合語言中，想把不需要的位元清零(過濾)，要用哪個邏輯指令？", options: [
+                { text: "A. AND", next: "q19", isCorrect: true }, { text: "B. OR", next: "q18_help", log: "Q18錯" }
+            ]}, "q18_help": { tag: "💊 救援", text: "遇到 0 就強制變 0 的是哪一種邏輯閘？", options: [ { text: "A. AND", next: "q18", isCorrect: true }, { text: "B. OR", next: "q18_help", log: "Q18救錯" } ]},
+
+            "q19": { tag: "第 19 關：相對定址", text: "每筆資料佔 2 Bytes。第一筆在 [BX]，讀取「第 4 筆」位址為？", options: [
+                { text: "A. [BX]+6", next: "q20", isCorrect: true }, { text: "B. [BX]+4", next: "q19_help", log: "Q19錯" }
+            ]}, "q19_help": { tag: "💊 救援", text: "距離開頭有 3 筆，3 × 2 Bytes = ?", options: [ { text: "A. +6", next: "q19", isCorrect: true }, { text: "B. +4", next: "q19_help", log: "Q19救錯" } ]},
+
+            // 🎸 流行文化 4
+            "q20": { tag: "🎸 第 20 關：音樂祭 (五月天)", text: "台灣天團「五月天」中，經常在演唱會上負責主唱位置的是哪位團員？", options: [
+                { text: "A. 阿信", next: "q21", isCorrect: true }, { text: "B. 怪獸", next: "q20_help", log: "Q20錯" }, { text: "C. 瑪莎", next: "q20_help", log: "Q20錯" }, { text: "D. 冠佑", next: "q20_help", log: "Q20錯" }
+            ]}, "q20_help": { tag: "💊 提示", text: "名字裡面有一個「信」字。", options: [ { text: "A. 阿信", next: "q20", isCorrect: true }, { text: "B. 石頭", next: "q20_help", log: "Q20救錯" } ]},
+
+            "q21": { tag: "第 21 關：效能 CPI", text: "時脈頻率 2.5 GHz，執行速度 500 MIPS，則 CPI 是多少？", options: [
+                { text: "A. 5", next: "q22", isCorrect: true }, { text: "B. 2", next: "q21_help", log: "Q21錯" }
+            ]}, "q21_help": { tag: "💊 救援", text: "CPI = 時脈 / MIPS。2500M ÷ 500M = ?", options: [ { text: "A. 5", next: "q21", isCorrect: true }, { text: "B. 2.5", next: "q21_help", log: "Q21救錯" } ]},
+
+            "q22": { tag: "第 22 關：控制匯流排", text: "IO/M(反相)=1、RD(反相)=1、WR(反相)=0，代表 CPU 正在做什麼？(0為動作)", options: [
+                { text: "A. 寫入 I/O 埠", next: "q23", isCorrect: true }, { text: "B. 讀取記憶體", next: "q22_help", log: "Q22錯" }
+            ]}, "q22_help": { tag: "💊 救援", text: "IO為1，WR為0(動作)，所以是？", options: [ { text: "A. 寫入 I/O", next: "q22", isCorrect: true }, { text: "B. 讀取", next: "q22_help", log: "Q22救錯" } ]},
+
+            "q23": { tag: "第 23 關：串列傳輸", text: "I2C 含有 SCL (時脈線) 與 SDA (資料線)，它是屬於哪種傳輸？", options: [
+                { text: "A. 同步串列傳輸", next: "q24", isCorrect: true }, { text: "B. 非同步", next: "q23_help", log: "Q23錯" }
+            ]}, "q23_help": { tag: "💊 救援", text: "有「時脈線」帶著大家一起動，就是？", options: [ { text: "A. 同步", next: "q23", isCorrect: true }, { text: "B. 非同步", next: "q23_help", log: "Q23救錯" } ]},
+
+            "q24": { tag: "第 24 關：中斷機制", text: "「中斷式 I/O」比起「程式輪詢」，最大的優點是？", options: [
+                { text: "A. 提升 CPU 效能", next: "q25", isCorrect: true }, { text: "B. 不需控制器", next: "q24_help", log: "Q24錯" }
+            ]}, "q24_help": { tag: "💊 救援", text: "有急診才通知醫生，不用一直問，能提升醫生的？", options: [ { text: "A. 工作效能", next: "q24", isCorrect: true }, { text: "B. 記憶力", next: "q24_help", log: "Q24救錯" } ]},
+
+            // 🎵 流行文化 5
+            "q25": { tag: "🎵 第 25 關：K-POP ((G)I-DLE)", text: "韓國人氣女團 (G)I-DLE 中，來自台灣的泰雅族成員是？", options: [
+                { text: "A. 舒華 (Shuhua)", next: "q26", isCorrect: true }, { text: "B. 雨琦", next: "q25_help", log: "Q25錯" }, { text: "C. 薇娟", next: "q25_help", log: "Q25錯" }, { text: "D. 小娟", next: "q25_help", log: "Q25錯" }
+            ]}, "q25_help": { tag: "💊 提示", text: "全名叫「葉舒華」。", options: [ { text: "A. 舒華", next: "q25", isCorrect: true }, { text: "B. 雨琦", next: "q25_help", log: "Q25救錯" } ]},
+
+            "q26": { tag: "第 26 關：巴克豪生準則", text: "產生穩定振盪的條件，閉迴路增益 |Aβ| 的大小為何？", options: [
+                { text: "A. |Aβ| = 1", next: "q27", isCorrect: true }, { text: "B. |Aβ| > 1", next: "q26_help", log: "Q26錯" }
+            ]}, "q26_help": { tag: "💊 救援", text: "增益必須剛剛好等於多少才能持續振盪？", options: [ { text: "A. 1", next: "q26", isCorrect: true }, { text: "B. 0", next: "q26_help", log: "Q26救錯" } ]},
+
+            "q27": { tag: "第 27 關：RC 網路", text: "RC 相移振盪器通常用 3 節 RC 網路，每節提供多少相移？", options: [
+                { text: "A. 60°", next: "q28", isCorrect: true }, { text: "B. 90°", next: "q27_help", log: "Q27錯" }
+            ]}, "q27_help": { tag: "💊 救援", text: "總共需要 180°，除以 3 節 = ?", options: [ { text: "A. 60°", next: "q27", isCorrect: true }, { text: "B. 90°", next: "q27_help", log: "Q27救錯" } ]},
+
+            "q28": { tag: "第 28 關：石英晶體", text: "石英晶體振盪器頻率極度穩定，是因為它具有什麼特性？", options: [
+                { text: "A. 壓電效應，Q值極高", next: "q29", isCorrect: true }, { text: "B. 光電效應", next: "q28_help", log: "Q28錯" }
+            ]}, "q28_help": { tag: "💊 救援", text: "通電產生機械震動稱為？", options: [ { text: "A. 壓電效應", next: "q28", isCorrect: true }, { text: "B. 溫室效應", next: "q28_help", log: "Q28救錯" } ]},
+
+            "q29": { tag: "第 29 關：樞密特觸發器", text: "樞密特觸發器具有遲滯特性，最主要的用途是？", options: [
+                { text: "A. 波形整型 (轉為方波)", next: "q30", isCorrect: true }, { text: "B. 放大微波", next: "q29_help", log: "Q29錯" }
+            ]}, "q29_help": { tag: "💊 救援", text: "用來消除雜訊，把亂七八糟的波變成漂亮的？", options: [ { text: "A. 方波", next: "q29", isCorrect: true }, { text: "B. 弦波", next: "q29_help", log: "Q29救錯" } ]},
+
+            // 🐉 流行文化 6 (最終題)
+            "q30": { tag: "🐉 最終關：手遊時間 (Pokémon GO)", text: "在手遊《Pokémon GO》中，如果想要捕捉到神獸（如洛奇亞、裂空座），通常需要參加哪一種活動？", options: [
+                { text: "A. 團體戰 (Raid Battle)", next: "end", isCorrect: true }, { text: "B. 孵蛋", next: "q30_help", log: "Q30錯" }, { text: "C. 旋轉補給站", next: "q30_help", log: "Q30錯" }, { text: "D. 傳送禮物給好友", next: "q30_help", log: "Q30錯" }
+            ]}, "q30_help": { tag: "💊 提示", text: "神獸血量很高，需要很多玩家「揪團」一起打。那叫什麼戰？", options: [ { text: "A. 團體戰", next: "q30", isCorrect: true }, { text: "B. 道館防守", next: "q30_help", log: "Q30救錯" } ]}
+        };
+
+        // ==========================================
+        // 系統變數與遊戲邏輯
+        // ==========================================
+        let studentName = "";
+        let currentStep = "q1"; 
+        let hp = 30; // 🩸 放寬血量：30題給30滴血
+        let currentStreak = 0; // 🔥 連擊計算器
+        let diagnosticLogs = [];
+        let sessionCards = []; 
+        let failedQuestions = []; 
+        let startTime = 0;           
+        let totalTime = 0;           
+        let rescueTriggered = 0;     
+        let rescueFails = 0;         
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwFB06xxuJtRZdqkc-LcVJEfgsEyI1Dn3R5k6M1sEafiDIsxFx2cDchDTJBglvYVhmVZA/exec';
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function saveToCollection(cardObj) {
+            let storageKey = "gachaCollection_" + studentName;
+            let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+            let existingCard = pastCollection.find(c => c.id === cardObj.id);
+            if(existingCard) { existingCard.count += 1; } 
+            else { pastCollection.push({ ...cardObj, count: 1 }); }
+            localStorage.setItem(storageKey, JSON.stringify(pastCollection));
+        }
+
+        function openCollection() {
+            let inputName = document.getElementById('student-name').value.trim();
+            if(!inputName) { alert("請先輸入姓名！"); return; }
+            
+            let storageKey = "gachaCollection_" + inputName;
+            let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+            
+            let normalPool = cardPool.filter(c => c.chance > 0);
+            let uniqueCount = normalPool.filter(mc => pastCollection.some(pc => pc.id === mc.id)).length;
+            let totalCount = normalPool.length;
+            document.getElementById('collection-title').innerText = `🏆 ${inputName} 的圖鑑 (${uniqueCount} / ${totalCount})`;
+            
+            let grid = document.getElementById('collection-grid');
+            grid.innerHTML = "";
+            
+            cardPool.forEach(masterCard => {
+                let ownedCard = pastCollection.find(c => c.id === masterCard.id);
+                if (masterCard.chance === 0 && !ownedCard) return; 
+
+                if (ownedCard) {
+                    let synthHtml = "";
+                    if (masterCard.rarity === "N" && ownedCard.count >= 5) {
+                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}')">✨ 5合1 覺醒</button>`;
+                    }
+                    grid.innerHTML += `
+                        <div class="mini-card">
+                            <div class="count">x${ownedCard.count}</div>
+                            <img src="${masterCard.image}" alt="${masterCard.name}">
+                            <div class="name">${masterCard.name}</div>
+                            ${synthHtml}
+                        </div>`;
+                } else {
+                    grid.innerHTML += `
+                        <div class="mini-card unowned">
+                            <img src="${masterCard.image}" alt="???">
+                            <div class="name">【???】未知卡片</div>
+                        </div>`;
+                }
+            });
+            document.getElementById('collection-modal').style.display = "flex";
+        }
+
+        function synthesizeCard(nCardId) {
+            let inputName = document.getElementById('student-name').value.trim();
+            let storageKey = "gachaCollection_" + inputName;
+            let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+            let nCardIndex = pastCollection.findIndex(c => c.id === nCardId);
+            if (nCardIndex > -1 && pastCollection[nCardIndex].count >= 5) {
+                pastCollection[nCardIndex].count -= 5;
+                let spCardId = "c_sp1"; 
+                let spMaster = cardPool.find(c => c.id === spCardId);
+                let spCardIndex = pastCollection.findIndex(c => c.id === spCardId);
+                
+                if (spCardIndex > -1) { pastCollection[spCardIndex].count += 1; } 
+                else { pastCollection.push({ ...spMaster, count: 1 }); }
+                
+                localStorage.setItem(storageKey, JSON.stringify(pastCollection));
+                closeCollection();
+                showSynthesisAnimation(spMaster);
+            }
+        }
+
+        function showSynthesisAnimation(spCard) {
+            playSound('synth'); 
+            const overlay = document.getElementById('gacha-overlay');
+            const cardObj = document.getElementById('revealed-card');
+            
+            document.getElementById('pre-draw-btn').style.display = 'none';
+            document.getElementById('gacha-title').innerText = "✨ 碎片融合！傳說覺醒！ ✨";
+            
+            cardObj.className = "gacha-card card-SP"; 
+            document.getElementById('card-image').src = spCard.image; 
+            document.getElementById('card-image').style.display = 'block'; 
+            document.getElementById('card-name').innerText = spCard.name;
+            cardObj.style.display = 'flex';
+            
+            const postBtn = document.getElementById('post-draw-btn');
+            postBtn.innerText = "收下隱藏神卡";
+            postBtn.style.display = 'block';
+            postBtn.onclick = function() {
+                cardObj.style.transform = "scale(0)"; 
+                setTimeout(() => {
+                    overlay.style.display = "none";
+                    postBtn.innerText = "收下神卡並繼續";
+                    postBtn.onclick = closeGacha; 
+                    openCollection(); 
+                }, 300);
+            };
+            overlay.style.display = "flex";
+            setTimeout(() => { cardObj.style.transform = "scale(1)"; }, 100);
+        }
+
+        function closeCollection() { document.getElementById('collection-modal').style.display = "none"; }
+
+        function startGame() {
+            studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) { alert("請先輸入姓名喔！"); return; }
+            startTime = Date.now();
+            initAudio(); 
+            document.getElementById('student-setup').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+            updateStatus();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentStep === "end") { finishGame(); return; }
+            const q = quizData[currentStep];
+            document.getElementById('q-tag').innerText = q.tag;
+            document.getElementById('q-text').innerHTML = q.text;
+
+            if (q.tag.includes("救援") || q.tag.includes("提示")) {
+                document.getElementById('q-tag').style.background = "#8e44ad"; 
+                document.body.classList.add('rescue-mode'); 
+            } else {
+                document.body.classList.remove('rescue-mode'); 
+                if (q.tag.includes("流行") || q.tag.includes("放鬆") || q.tag.includes("時間")) {
+                    document.getElementById('q-tag').style.background = "#27ae60"; 
+                } else {
+                    document.getElementById('q-tag').style.background = "#e74c3c"; 
+                }
+            }
+
+            const optionsArea = document.getElementById('options-area');
+            optionsArea.innerHTML = ""; 
+
+            let shuffledOptions = [...q.options];
+            shuffleArray(shuffledOptions);
+            const labels = ["A", "B", "C", "D"];
+
+            shuffledOptions.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                let cleanText = opt.text.replace(/^[A-D]\.\s*/, "");
+                btn.innerText = `${labels[index]}. ${cleanText}`;
+                // 🔥 將點擊事件改為傳遞 handleAnswer，判斷邏輯全部移交內部
+                btn.onclick = () => handleAnswer(opt);
+                optionsArea.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedOption) {
+            let isRescueQuestion = currentStep.includes("_help"); 
+
+            if (!selectedOption.isCorrect) {
+                playSound('wrong'); 
+                hp--; if(hp < 0) hp = 0; 
+                currentStreak = 0; // 🚨 答錯斷連擊
+                updateStatus();
+                if (selectedOption.log) diagnosticLogs.push(selectedOption.log);
+                
+                if (!failedQuestions.includes(currentStep)) {
+                    failedQuestions.push(currentStep);
+                }
+
+                if (!isRescueQuestion) { rescueTriggered++; } 
+                else { rescueFails++; }
+
+                currentStep = selectedOption.next;
+                renderQuestion();
+            } 
+            else {
+                playSound('correct'); 
+                showCorrectSplash();  
+                
+                // 💡 在「非救援題」答對，且之前沒死過，連擊數才 +1
+                if (!isRescueQuestion && !failedQuestions.includes(currentStep)) {
+                    currentStreak++;
+                }
+
+                setTimeout(() => {
+                    let nextStep = selectedOption.next;
+                    
+                    // 🔥 檢查是否達成 2 連擊
+                    if (currentStreak >= 2) {
+                        currentStreak = 0; // 抽卡後歸零
+                        currentStep = nextStep;
+                        document.getElementById('gacha-title').innerText = "🔥 二連擊達成！獲得抽卡機會！ ✨";
+                        prepareGacha(); 
+                    } else {
+                        currentStep = nextStep;
+                        renderQuestion();
+                    }
+                    updateStatus();
+                }, 800);
+            }
+        }
+
+        function showCorrectSplash() {
+            const splash = document.getElementById('correct-splash');
+            splash.classList.add('show');
+            setTimeout(() => { splash.classList.remove('show'); }, 600);
+        }
+
+        function updateStatus() {
+            let hpText = hp > 10 ? `❤️❤️ x ${hp}` : "❤️".repeat(hp);
+            document.getElementById('hearts').innerText = hpText;
+            document.getElementById('streak-display').innerText = `🔥 連擊: ${currentStreak} / 2`;
+        }
+
+        function prepareGacha() {
+            const overlay = document.getElementById('gacha-overlay');
+            document.getElementById('pre-draw-btn').style.display = 'block';
+            document.getElementById('revealed-card').style.display = 'none';
+            document.getElementById('post-draw-btn').style.display = 'none';
+            overlay.style.display = "flex";
+        }
+
+        function executeDraw() {
+            playSound('draw'); 
+            document.getElementById('pre-draw-btn').style.display = 'none';
+            document.getElementById('gacha-title').innerText = "🎉 戰利品揭曉 🎉";
+            drawCard(); 
+        }
+
+        function drawCard() {
+            const cardObj = document.getElementById('revealed-card');
+            let drawablePool = cardPool.filter(c => c.chance > 0);
+            let randomNum = Math.random() * 100;
+            let currentLimit = 0;
+            let resultCard = drawablePool[drawablePool.length - 1]; 
+            for (let i = 0; i < drawablePool.length; i++) {
+                currentLimit += drawablePool[i].chance;
+                if (randomNum <= currentLimit) { resultCard = drawablePool[i]; break; }
+            }
+
+            cardObj.className = "gacha-card"; 
+            cardObj.classList.add(`card-${resultCard.rarity}`);
+            document.getElementById('card-image').src = resultCard.image; 
+            document.getElementById('card-image').style.display = 'block'; 
+            document.getElementById('card-name').innerText = resultCard.name;
+            
+            cardObj.style.display = 'flex';
+            document.getElementById('post-draw-btn').style.display = 'block';
+            setTimeout(() => { cardObj.style.transform = "scale(1)"; }, 100);
+
+            sessionCards.push(resultCard.name);
+            saveToCollection(resultCard); 
+            document.getElementById('inventory-display').innerText = `🎒 本局已抽: ${sessionCards.length} 張`;
+        }
+
+        function closeGacha() {
+            const overlay = document.getElementById('gacha-overlay');
+            const cardObj = document.getElementById('revealed-card');
+            cardObj.style.transform = "scale(0)"; 
+            setTimeout(() => {
+                overlay.style.display = "none";
+                renderQuestion(); 
+            }, 300);
+        }
+
+        function finishGame() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+
+            totalTime = Math.round((Date.now() - startTime) / 1000);
+
+            let reportArea = document.getElementById('log-report');
+            let finalScoreText = `血量剩餘：${hp}\n🕒 耗時：${totalTime} 秒\n🏀 本局共獲得 ${sessionCards.length} 張卡片\n\n`;
+            let logText = diagnosticLogs.length === 0 ? "🌟 完美通關，基礎極度扎實！" : "⚠️ 盲點診斷 (請老師留意)：\n" + diagnosticLogs.join("\n");
+            
+            reportArea.innerText = finalScoreText + logText;
+
+            let itemsText = sessionCards.length > 0 ? sessionCards.join(",") : "無";
+            sendDataToSheet(
+                studentName, hp, totalTime, rescueTriggered, rescueFails, 
+                diagnosticLogs.length, diagnosticLogs.join(" | "), itemsText
+            );
+        }
+
+        function sendDataToSheet(name, hp, time, rescueT, rescueF, errorCount, errorDetails, cards) {
+            let formData = new URLSearchParams();
+            formData.append('name', name);
+            formData.append('hp', hp);
+            formData.append('time', time);
+            formData.append('rescueTriggered', rescueT);
+            formData.append('rescueFails', rescueF); 
+            formData.append('errorCount', errorCount);
+            formData.append('errorDetails', errorDetails);
+            formData.append('cards', cards);
+            
+            fetch(scriptURL, { method: 'POST', body: formData });
+        }
+    </script>
+</body>
+</html>
