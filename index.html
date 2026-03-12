@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>基本電學 - 抽卡特訓班 (30題連擊版)</title>
+    <title>程式語言設計 - 抽卡特訓班 (30題連擊版)</title>
     <style>
         body {
             font-family: '微軟正黑體', sans-serif; 
@@ -137,7 +137,10 @@
             <h1>🏀 統測特訓：30題不間斷！</h1>
             <div class="subtitle">連續答對 2 題即可抽卡！<br>(蒐集 5 張相同的 N 卡可融合為隱藏特效卡)</div>
             <input type="text" id="student-name" placeholder="請輸入 班級+座號+姓名">
-            <button class="btn btn-start" onclick="startGame()">開始 30 題大挑戰</button>
+            
+            <button class="btn" id="btn-sync" style="background-color: #2980b9; box-shadow: 0 4px #1c5980;" onclick="syncCloudData()">☁️ 1. 載入雲端圖鑑存檔</button>
+            
+            <button class="btn btn-start" onclick="startGame()">▶️ 2. 開始 30 題大挑戰</button>
             <button class="btn btn-collection" onclick="openCollection()">📖 查看我的圖鑑進度</button>
         </div>
 
@@ -219,134 +222,608 @@
         ];
 
         // ==========================================
-        // 30 題大補帖 (學科 + 流行文化混合，拿掉單題 triggerGacha)
+        // 教師設定區：資電類 程式語言設計 (30題連擊大補帖)
         // ==========================================
         const quizData = {
-            "q1": { tag: "第 1 關：基本電學", text: "在 RLC 串聯電路中，發生「諧振」時，感抗 (XL) 與容抗 (XC) 大小關係為何？", options: [
-                { text: "A. XL = XC (相等)", next: "q2", isCorrect: true }, { text: "B. XL > XC", next: "q1_help", log: "Q1錯" }
-            ]}, "q1_help": { tag: "💊 救援", text: "要互相抵消，大小必須如何？", options: [ { text: "A. 完全相等", next: "q1", isCorrect: true }, { text: "B. 一大一小", next: "q1_help", log: "Q1救錯" } ]},
-            
-            "q2": { tag: "第 2 關：串聯特性", text: "RLC 串聯諧振時，總阻抗 (Z) 與總電流 (I) 的狀態？", options: [
-                { text: "A. 阻抗最小，電流最大", next: "q3", isCorrect: true }, { text: "B. 阻抗最大", next: "q2_help", log: "Q2錯" }
-            ]}, "q2_help": { tag: "💊 救援", text: "抵消後只剩電阻，阻力變小，電流會？", options: [ { text: "A. 最大", next: "q2", isCorrect: true }, { text: "B. 最小", next: "q2_help", log: "Q2救錯" } ]},
-            
-            "q3": { tag: "第 3 關：並聯反轉", text: "RLC「並聯」諧振電路，發生諧振時總阻抗 (Z) 會？", options: [
-                { text: "A. 阻抗最大，電流最小", next: "q4", isCorrect: true }, { text: "B. 阻抗最小", next: "q3_help", log: "Q3錯" }
-            ]}, "q3_help": { tag: "💊 救援", text: "並聯跟串聯相反！阻力變極大，電流會？", options: [ { text: "A. 最小", next: "q3", isCorrect: true }, { text: "B. 最大", next: "q3_help", log: "Q3救錯" } ]},
-            
-            "q4": { tag: "第 4 關：諧振頻率", text: "理想 RLC 電路的「諧振頻率 (fr)」公式為何？", options: [
-                { text: "A. 1 / (2π√LC)", next: "q5", isCorrect: true }, { text: "B. 2π√LC", next: "q4_help", log: "Q4錯" }
-            ]}, "q4_help": { tag: "💊 救援", text: "頻率的 LC 都在哪裡？", options: [ { text: "A. 根號內，分母", next: "q4", isCorrect: true }, { text: "B. 分子", next: "q4_help", log: "Q4救錯" } ]},
-            
-            // 🏐 流行文化 1
-            "q5": { tag: "🎈 第 5 關：動漫放鬆 (排球少年)", text: "在動畫《排球少年》中，日向與影山被稱為「怪人快攻」組合，請問他們所屬的烏野高中代表動物是？", options: [
-                { text: "A. 烏鴉", next: "q6", isCorrect: true }, { text: "B. 貓", next: "q5_help", log: "Q5錯" }, { text: "C. 貓頭鷹", next: "q5_help", log: "Q5錯" }, { text: "D. 狐狸", next: "q5_help", log: "Q5錯" }
-            ]}, "q5_help": { tag: "💊 提示", text: "「烏」野高中的名字裡面，有哪一種鳥類？", options: [ { text: "A. 烏鴉", next: "q5", isCorrect: true }, { text: "B. 企鵝", next: "q5_help", log: "Q5救錯" } ]},
+            // --- 第 1 關：變數命名 ---
+            "q1": {
+                tag: "第 1 關：基礎語法",
+                text: "在 C/C++ 等主流程式語言中，下列何者是「合法」的變數名稱？",
+                options: [
+                    { text: "A. _score", next: "q2", isCorrect: true },
+                    { text: "B. 2nd_place", next: "q1_help", log: "Q1錯: 變數不能以數字開頭" },
+                    { text: "C. int", next: "q1_help", log: "Q1錯: 不能使用系統保留字" },
+                    { text: "D. my-name", next: "q1_help", log: "Q1錯: 減號是運算子，只能用底線" }
+                ]
+            },
+            "q1_help": {
+                tag: "💊 救援任務：命名規則",
+                text: "變數名稱只能由「英文字母、數字、底線」組成，而且「絕對不可以」用數字開頭！請選出唯一符合規則的選項：",
+                options: [
+                    { text: "A. _score (底線開頭合法)", next: "q1", isCorrect: true }, 
+                    { text: "B. 2nd_place", next: "q1_help", log: "Q1救錯: 數字開頭直接報錯喔" } 
+                ]
+            },
 
-            "q6": { tag: "第 6 關：三相電源", text: "「Y 型 (星型)」接法中，線電壓 (VL) 與相電壓 (VP) 大小關係？", options: [
-                { text: "A. VL = √3 VP", next: "q7", isCorrect: true }, { text: "B. VL = VP", next: "q6_help", log: "Q6錯" }
-            ]}, "q6_help": { tag: "💊 救援", text: "Y型兩火線跨越兩相，電壓會放大多少倍？", options: [ { text: "A. √3倍", next: "q6", isCorrect: true }, { text: "B. 相等", next: "q6_help", log: "Q6救錯" } ]},
-            
-            "q7": { tag: "第 7 關：Y型電流", text: "「Y 型」接法中，線電流 (IL) 與相電流 (IP) 大小關係？", options: [
-                { text: "A. IL = IP (相等)", next: "q8", isCorrect: true }, { text: "B. IL = √3 IP", next: "q7_help", log: "Q7錯" }
-            ]}, "q7_help": { tag: "💊 救援", text: "水管直直通出去沒分岔，所以電流？", options: [ { text: "A. 完全相等", next: "q7", isCorrect: true }, { text: "B. 變大", next: "q7_help", log: "Q7救錯" } ]},
-            
-            "q8": { tag: "第 8 關：Δ 型接法", text: "「Δ 型 (三角)」接法時，電壓與電流特性分別為何？", options: [
-                { text: "A. VL = VP 且 IL = √3 IP", next: "q9", isCorrect: true }, { text: "B. VL = √3 VP", next: "q8_help", log: "Q8錯" }
-            ]}, "q8_help": { tag: "💊 救援", text: "並聯電壓相等，但在節點會分流，所以電流是幾倍？", options: [ { text: "A. √3倍", next: "q8", isCorrect: true }, { text: "B. 3倍", next: "q8_help", log: "Q8救錯" } ]},
-            
-            "q9": { tag: "第 9 關：總功率", text: "實務上用「線電壓 (VL)」與「線電流 (IL)」計算三相總有效功率 (PT)，公式為？", options: [
-                { text: "A. PT = √3 × VL × IL × cosθ", next: "q10", isCorrect: true }, { text: "B. PT = 3 × VL × IL × cosθ", next: "q9_help", log: "Q9錯" }
-            ]}, "q9_help": { tag: "💊 救援", text: "只要公式裡面寫的是「線(L)」，前面的係數必定是多少？", options: [ { text: "A. √3", next: "q9", isCorrect: true }, { text: "B. 3", next: "q9_help", log: "Q9救錯" } ]},
+            // --- 第 2 關：資料型態 ---
+            "q2": {
+                tag: "第 2 關：資料型態",
+                text: "一般在 32 位元以上的系統中，宣告一個標準整數變數 `int`，通常會在記憶體中佔用多少位元組 (Bytes)？",
+                options: [
+                    { text: "A. 4 Bytes", next: "q3", isCorrect: true },
+                    { text: "B. 1 Byte", next: "q2_help", log: "Q2錯: 這是字元 char 的大小" },
+                    { text: "C. 2 Bytes", next: "q2_help", log: "Q2錯: 這是短整數 short 的大小" },
+                    { text: "D. 8 Bytes", next: "q2_help", log: "Q2錯: 這是雙倍精度浮點數 double 的大小" }
+                ]
+            },
+            "q2_help": {
+                tag: "💊 救援任務：記憶體空間",
+                text: "記憶體大小口訣：字元(char)最輕巧佔 1 Byte，標準整數(int)與單精度浮點數(float)都是它的 4 倍。所以 `int` 佔幾 Bytes？",
+                options: [
+                    { text: "A. 4 Bytes", next: "q2", isCorrect: true }, 
+                    { text: "B. 1 Byte", next: "q2_help", log: "Q2救錯: 1 Byte 只能存一個英文字母喔" } 
+                ]
+            },
 
-            // 🌟 流行文化 2
-            "q10": { tag: "🌟 第 10 關：動漫放鬆 (JOJO)", text: "在《JOJO的奇妙冒險》第三部中，主角空条承太郎的替身名稱是？", options: [
-                { text: "A. 白金之星", next: "q11", isCorrect: true }, { text: "B. 瘋狂鑽石", next: "q10_help", log: "Q10錯" }, { text: "C. 黃金體驗", next: "q10_help", log: "Q10錯" }, { text: "D. 隱者之紫", next: "q10_help", log: "Q10錯" }
-            ]}, "q10_help": { tag: "💊 提示", text: "他最喜歡喊「歐拉歐拉」，且名字跟星星(Star)有關。", options: [ { text: "A. 白金之星", next: "q10", isCorrect: true }, { text: "B. 瘋狂鑽石", next: "q10_help", log: "Q10救錯" } ]},
+            // --- 第 3 關：初始值 ---
+            "q3": {
+                tag: "第 3 關：變數宣告",
+                text: "執行程式碼 `int a = 5, b;` 後，此時變數 `b` 的值為何？",
+                options: [
+                    { text: "A. 無法預測的垃圾值 (Garbage value)", next: "q4", isCorrect: true },
+                    { text: "B. 5", next: "q3_help", log: "Q3錯: 只有 a 被賦予 5" },
+                    { text: "C. 0", next: "q3_help", log: "Q3錯: 區域變數不會自動歸零" },
+                    { text: "D. 程式會直接當機", next: "q3_help", log: "Q3錯: 語法合法，不會當機，只是 b 內容未知" }
+                ]
+            },
+            "q3_help": {
+                tag: "💊 救援任務：未初始化的危險",
+                text: "在函式內部宣告的區域變數，如果「沒有」給它等號設定初始值，系統就會把那塊記憶體前一個人留下的殘留資料給它。這稱為什麼？",
+                options: [
+                    { text: "A. 垃圾值 (Garbage value)", next: "q3", isCorrect: true }, 
+                    { text: "B. 0", next: "q3_help", log: "Q3救錯: C/C++ 不會這麼貼心幫你歸零" } 
+                ]
+            },
 
-            "q11": { tag: "第 11 關：微處理機", text: "現代常見的個人電腦處理器（如 AMD Ryzen）是屬於多少位元的架構？", options: [
-                { text: "A. 64 位元", next: "q12", isCorrect: true }, { text: "B. 32 位元", next: "q11_help", log: "Q11錯" }
-            ]}, "q11_help": { tag: "💊 救援", text: "現在電腦早就超越 32 位元了，是它的兩倍！", options: [ { text: "A. 64", next: "q11", isCorrect: true }, { text: "B. 16", next: "q11_help", log: "Q11救錯" } ]},
-            
-            "q12": { tag: "第 12 關：歷史常識", text: "Intel 從哪一顆處理器開始，正式進入了「32 位元」的時代？", options: [
-                { text: "A. Intel 80386", next: "q13", isCorrect: true }, { text: "B. Intel 8086", next: "q12_help", log: "Q12錯" }
-            ]}, "q12_help": { tag: "💊 救援", text: "口訣：有數字 3 的就是 32 位元起點。", options: [ { text: "A. 80386", next: "q12", isCorrect: true }, { text: "B. 80286", next: "q12_help", log: "Q12救錯" } ]},
+            // --- 第 4 關：整數除法 ---
+            "q4": {
+                tag: "第 4 關：算術運算",
+                text: "在 C/C++ 中，執行運算式 `7 / 2`，其運算結果為何？",
+                options: [
+                    { text: "A. 3", next: "q5", isCorrect: true },
+                    { text: "B. 3.5", next: "q4_help", log: "Q4錯: 兩邊都是整數，小數點會被無情捨去" },
+                    { text: "C. 4", next: "q4_help", log: "Q4錯: 不會四捨五入" },
+                    { text: "D. 1", next: "q4_help", log: "Q4錯: 這是取餘數(%)的結果" }
+                ]
+            },
+            "q4_help": {
+                tag: "💊 救援任務：整數的堅持",
+                text: "當「整數」除以「整數」時，電腦會非常固執，計算結果也絕對只能是「整數」，小數點後面的數字會直接被砍掉！7 除以 2 的商數是多少？",
+                options: [
+                    { text: "A. 3", next: "q4", isCorrect: true }, 
+                    { text: "B. 3.5", next: "q4_help", log: "Q4救錯: 記得把小數點無情砍掉！" } 
+                ]
+            },
 
-            "q13": { tag: "第 13 關：SRAM", text: "關於 SRAM (靜態隨機存取記憶體) 的敘述何者正確？", options: [
-                { text: "A. 每個位元需 6 個電晶體", next: "q14", isCorrect: true }, { text: "B. 需要不斷刷新", next: "q13_help", log: "Q13錯" }
-            ]}, "q13_help": { tag: "💊 救援", text: "它不用充電刷新，由正反器構成，需要幾個電晶體？", options: [ { text: "A. 6個", next: "q13", isCorrect: true }, { text: "B. 1個", next: "q13_help", log: "Q13救錯" } ]},
+            // --- 第 5 關：取餘數 ---
+            "q5": {
+                tag: "第 5 關：算術運算",
+                text: "運算式 `14 % 4` (取餘數運算子) 的結果為何？",
+                options: [
+                    { text: "A. 2", next: "q6", isCorrect: true },
+                    { text: "B. 3", next: "q5_help", log: "Q5錯: 這是 14 除以 4 的商數" },
+                    { text: "C. 3.5", next: "q5_help", log: "Q5錯: % 只能用於整數找餘數" },
+                    { text: "D. 0", next: "q5_help", log: "Q5錯: 14 不能被 4 整除" }
+                ]
+            },
+            "q5_help": {
+                tag: "💊 救援任務：小學除法",
+                text: "「%」這個符號不是百分比，在程式裡叫做「取餘數」。14 除以 4，等於 3 ... 餘下多少？",
+                options: [
+                    { text: "A. 餘 2", next: "q5", isCorrect: true },
+                    { text: "B. 餘 3", next: "q5_help", log: "Q5救錯: 4 乘以 3 是 12，14 減 12 是 2 啦" }
+                ]
+            },
 
-            "q14": { tag: "第 14 關：位址計算", text: "記憶體起始位址 40000H，讀取 512 K 空間，結束位址為何？", options: [
-                { text: "A. BFFFFH", next: "q15", isCorrect: true }, { text: "B. C0000H", next: "q14_help", log: "Q14錯" }
-            ]}, "q14_help": { tag: "💊 救援", text: "512K = 80000H。結束位址 = 起始 + 容量 - 1。", options: [ { text: "A. BFFFFH", next: "q14", isCorrect: true }, { text: "B. C0000H", next: "q14_help", log: "Q14救錯" } ]},
+            // --- 第 6 關：遞增運算子 ---
+            "q6": {
+                tag: "第 6 關：遞增運算",
+                text: "執行 `int x = 5; int y = x++;` 之後，x 與 y 的值分別為何？",
+                options: [
+                    { text: "A. x = 6, y = 5", next: "q7", isCorrect: true },
+                    { text: "B. x = 6, y = 6", next: "q6_help", log: "Q6錯: 這是 ++x (前置遞增) 的結果" },
+                    { text: "C. x = 5, y = 5", next: "q6_help", log: "Q6錯: x 一定會加 1" },
+                    { text: "D. x = 5, y = 6", next: "q6_help", log: "Q6錯: 完全搞反了" }
+                ]
+            },
+            "q6_help": {
+                tag: "💊 救援任務：後置遞增",
+                text: "「x++」是後置遞增，口訣是「先做事，後加一」。所以 y 會先拿到 x 原本的值(5)，然後 x 自己才偷偷變成 6。所以 y 是多少？",
+                options: [
+                    { text: "A. y = 5 (x 變成 6)", next: "q6", isCorrect: true },
+                    { text: "B. y = 6 (x 變成 6)", next: "q6_help", log: "Q6救錯: 這是 ++x 才會發生的事" }
+                ]
+            },
 
-            // 🏀 流行文化 3
-            "q15": { tag: "🏀 第 15 關：體育時間 (NBA)", text: "NBA 金州勇士隊的當家球星 Stephen Curry 最著名的絕技是？", options: [
-                { text: "A. 超大號三分球", next: "q16", isCorrect: true }, { text: "B. 罰球線起跳灌籃", next: "q15_help", log: "Q15錯" }, { text: "C. 歐洲步上籃", next: "q15_help", log: "Q15錯" }, { text: "D. 禁區天勾", next: "q15_help", log: "Q15錯" }
-            ]}, "q15_help": { tag: "💊 提示", text: "他被稱為史上最強的「三分神射手」。", options: [ { text: "A. 三分球", next: "q15", isCorrect: true }, { text: "B. 灌籃", next: "q15_help", log: "Q15救錯" } ]},
+            // --- 第 7 關：關係運算子 ---
+            "q7": {
+                tag: "第 7 關：關係判斷",
+                text: "在條件判斷中，用來檢查「左右兩邊是否相等」的運算子是哪一個？",
+                options: [
+                    { text: "A. ==", next: "q8", isCorrect: true },
+                    { text: "B. =", next: "q7_help", log: "Q7錯: 一個等號是『指定(賦值)』" },
+                    { text: "C. !=", next: "q7_help", log: "Q7錯: 這是『不等於』" },
+                    { text: "D. <>", next: "q7_help", log: "Q7錯: 這是 SQL 或 VB 的語法，C/C++ 不用這個" }
+                ]
+            },
+            "q7_help": {
+                tag: "💊 救援任務：雙重確認",
+                text: "在程式裡，單一一個 `=` 是把右邊的東西塞給左邊。如果要問電腦「這兩個一樣嗎？」，必須使用「兩個」等號！",
+                options: [
+                    { text: "A. ==", next: "q7", isCorrect: true },
+                    { text: "B. =", next: "q7_help", log: "Q7救錯: 單一等號是拿來存資料的" }
+                ]
+            },
 
-            "q16": { tag: "第 16 關：邏輯元件", text: "PLD 中，哪一種是「AND 固定，只有 OR 可以程式化」？", options: [
-                { text: "A. PROM", next: "q17", isCorrect: true }, { text: "B. PAL", next: "q16_help", log: "Q16錯" }
-            ]}, "q16_help": { tag: "💊 救援", text: "找名字裡面有 O (代表 OR) 的元件！", options: [ { text: "A. PROM", next: "q16", isCorrect: true }, { text: "B. PAL", next: "q16_help", log: "Q16救錯" } ]},
+            // --- 第 8 關：邏輯運算子 ---
+            "q8": {
+                tag: "第 8 關：邏輯運算",
+                text: "運算式 `(5 > 3) && (2 < 1)` 的布林(Boolean)結果為何？",
+                options: [
+                    { text: "A. False (假 / 0)", next: "q9", isCorrect: true },
+                    { text: "B. True (真 / 1)", next: "q8_help", log: "Q8錯: 後半部的 2 < 1 是錯的" },
+                    { text: "C. 5", next: "q8_help", log: "Q8錯: 邏輯運算結果只會是真或假" },
+                    { text: "D. 1", next: "q8_help", log: "Q8錯: 1 代表 True" }
+                ]
+            },
+            "q8_help": {
+                tag: "💊 救援任務：嚴格的 AND",
+                text: "「&&」代表邏輯 AND (而且)。它的個性很嚴格，必須「左邊對，而且右邊也對」，結果才會是 True。現在右邊 (2 < 1) 是錯的，所以總結果是？",
+                options: [
+                    { text: "A. False (假)", next: "q8", isCorrect: true },
+                    { text: "B. True (真)", next: "q8_help", log: "Q8救錯: 只要有一個錯，AND 就是錯的！" }
+                ]
+            },
 
-            "q17": { tag: "第 17 關：GAL", text: "哪種裝置是 PAL 改良版，具備 OLMC 且可 EEPROM 重複抹寫？", options: [
-                { text: "A. GAL", next: "q18", isCorrect: true }, { text: "B. PROM", next: "q17_help", log: "Q17錯" }
-            ]}, "q17_help": { tag: "💊 救援", text: "字首 G 代表 Generic (通用)。", options: [ { text: "A. GAL", next: "q17", isCorrect: true }, { text: "B. PLA", next: "q17_help", log: "Q17救錯" } ]},
+            // --- 第 9 關：if 條件 ---
+            "q9": {
+                tag: "第 9 關：條件控制",
+                text: "執行以下程式碼：`if (0) { a=1; } else { a=2; }`，最後 a 的值為何？",
+                options: [
+                    { text: "A. 2", next: "q10", isCorrect: true },
+                    { text: "B. 1", next: "q9_help", log: "Q9錯: 括號內為 0，代表條件不成立" },
+                    { text: "C. 0", next: "q9_help", log: "Q9錯: a 被指定為 2 了" },
+                    { text: "D. 程式報錯", next: "q9_help", log: "Q9錯: 數字可以直接當作條件" }
+                ]
+            },
+            "q9_help": {
+                tag: "💊 救援任務：真假數字",
+                text: "在 C/C++ 的世界裡，「0 代表 False(假)，任何非 0 的數字都代表 True(真)」。既然括號裡是 0，代表條件不成立，會執行 else 區塊。所以 a 等於？",
+                options: [
+                    { text: "A. 2", next: "q9", isCorrect: true },
+                    { text: "B. 1", next: "q9_help", log: "Q9救錯: 0 是 False，進不去 if 裡面喔" }
+                ]
+            },
 
-            "q18": { tag: "第 18 關：位元遮罩", text: "組合語言中，想把不需要的位元清零(過濾)，要用哪個邏輯指令？", options: [
-                { text: "A. AND", next: "q19", isCorrect: true }, { text: "B. OR", next: "q18_help", log: "Q18錯" }
-            ]}, "q18_help": { tag: "💊 救援", text: "遇到 0 就強制變 0 的是哪一種邏輯閘？", options: [ { text: "A. AND", next: "q18", isCorrect: true }, { text: "B. OR", next: "q18_help", log: "Q18救錯" } ]},
+            // --- 第 10 關：switch 敘述 ---
+            "q10": {
+                tag: "第 10 關：多重選擇",
+                text: "在 `switch` 敘述中，用來「跳出」當前 switch 區塊，防止繼續往下執行的關鍵字是？",
+                options: [
+                    { text: "A. break", next: "q11", isCorrect: true },
+                    { text: "B. continue", next: "q10_help", log: "Q10錯: 這是用在迴圈跳過本回合的" },
+                    { text: "C. exit", next: "q10_help", log: "Q10錯: 這是直接關閉整個程式" },
+                    { text: "D. return", next: "q10_help", log: "Q10錯: 這是跳出整個函式" }
+                ]
+            },
+            "q10_help": {
+                tag: "💊 救援任務：煞車系統",
+                text: "switch 結構如果沒有加「煞車」，它會一路往下把所有的 case 都執行一遍 (稱為 fall-through)。用來煞車跳出的字是？",
+                options: [
+                    { text: "A. break (打破/中斷)", next: "q10", isCorrect: true },
+                    { text: "B. continue (繼續)", next: "q10_help", log: "Q10救錯: continue 不能用在 switch 裡" }
+                ]
+            },
 
-            "q19": { tag: "第 19 關：相對定址", text: "每筆資料佔 2 Bytes。第一筆在 [BX]，讀取「第 4 筆」位址為？", options: [
-                { text: "A. [BX]+6", next: "q20", isCorrect: true }, { text: "B. [BX]+4", next: "q19_help", log: "Q19錯" }
-            ]}, "q19_help": { tag: "💊 救援", text: "距離開頭有 3 筆，3 × 2 Bytes = ?", options: [ { text: "A. +6", next: "q19", isCorrect: true }, { text: "B. +4", next: "q19_help", log: "Q19救錯" } ]},
+            // --- 第 11 關：for 迴圈 ---
+            "q11": {
+                tag: "第 11 關：基本迴圈",
+                text: "迴圈 `for(int i = 0; i < 3; i++)` 裡面的主體程式，總共會被執行幾次？",
+                options: [
+                    { text: "A. 3 次", next: "q12", isCorrect: true },
+                    { text: "B. 2 次", next: "q11_help", log: "Q11錯: 忘記算 i=0 的那一次了" },
+                    { text: "C. 4 次", next: "q11_help", log: "Q11錯: 當 i=3 時條件不成立，不會進去" },
+                    { text: "D. 無限次", next: "q11_help", log: "Q11錯: i 每次都會加 1，一定會停" }
+                ]
+            },
+            "q11_help": {
+                tag: "💊 救援任務：手指數一數",
+                text: "我們跟著電腦算一次：i=0(進去執行第1次) -> i=1(執行第2次) -> i=2(執行第3次) -> i=3(發現不小於3，直接離開)。總共幾次？",
+                options: [
+                    { text: "A. 3 次", next: "q11", isCorrect: true },
+                    { text: "B. 4 次", next: "q11_help", log: "Q11救錯: i=3 的時候不會執行喔" }
+                ]
+            },
 
-            // 🎸 流行文化 4
-            "q20": { tag: "🎸 第 20 關：音樂祭 (五月天)", text: "台灣天團「五月天」中，經常在演唱會上負責主唱位置的是哪位團員？", options: [
-                { text: "A. 阿信", next: "q21", isCorrect: true }, { text: "B. 怪獸", next: "q20_help", log: "Q20錯" }, { text: "C. 瑪莎", next: "q20_help", log: "Q20錯" }, { text: "D. 冠佑", next: "q20_help", log: "Q20錯" }
-            ]}, "q20_help": { tag: "💊 提示", text: "名字裡面有一個「信」字。", options: [ { text: "A. 阿信", next: "q20", isCorrect: true }, { text: "B. 石頭", next: "q20_help", log: "Q20救錯" } ]},
+            // --- 第 12 關：while 迴圈 ---
+            "q12": {
+                tag: "第 12 關：條件迴圈",
+                text: "`while` 迴圈與 `do-while` 迴圈最大的差異是什麼？",
+                options: [
+                    { text: "A. do-while 無論條件為何，至少會執行 1 次", next: "q13", isCorrect: true },
+                    { text: "B. while 至少會執行 1 次", next: "q12_help", log: "Q12錯: while 如果一開始條件不符，0 次就結束了" },
+                    { text: "C. do-while 只能用遞減計數", next: "q12_help", log: "Q12錯: 沒有這種限制" },
+                    { text: "D. 沒有差別，只是寫法不同", next: "q12_help", log: "Q12錯: 執行順序大不同" }
+                ]
+            },
+            "q12_help": {
+                tag: "💊 救援任務：先斬後奏",
+                text: "do 就是「做」的意思。`do-while` 的精神是「先做再說，做完再來檢查條件」。所以它保底一定會執行幾次？",
+                options: [
+                    { text: "A. 至少執行 1 次", next: "q12", isCorrect: true },
+                    { text: "B. 可能 0 次", next: "q12_help", log: "Q12救錯: 這是普通的 while 迴圈" }
+                ]
+            },
 
-            "q21": { tag: "第 21 關：效能 CPI", text: "時脈頻率 2.5 GHz，執行速度 500 MIPS，則 CPI 是多少？", options: [
-                { text: "A. 5", next: "q22", isCorrect: true }, { text: "B. 2", next: "q21_help", log: "Q21錯" }
-            ]}, "q21_help": { tag: "💊 救援", text: "CPI = 時脈 / MIPS。2500M ÷ 500M = ?", options: [ { text: "A. 5", next: "q21", isCorrect: true }, { text: "B. 2.5", next: "q21_help", log: "Q21救錯" } ]},
+            // --- 第 13 關：巢狀迴圈 ---
+            "q13": {
+                tag: "第 13 關：巢狀迴圈",
+                text: "外層迴圈執行 3 次，內層迴圈執行 4 次。請問內層迴圈的主體總共會被執行幾次？",
+                options: [
+                    { text: "A. 12 次", next: "q14", isCorrect: true },
+                    { text: "B. 7 次", next: "q13_help", log: "Q13錯: 不是相加，是相乘" },
+                    { text: "C. 3 次", next: "q13_help", log: "Q13錯: 算少了" },
+                    { text: "D. 4 次", next: "q13_help", log: "Q13錯: 算少了" }
+                ]
+            },
+            "q13_help": {
+                tag: "💊 救援任務：乘法原理",
+                text: "外層就像是「有 3 個班級」，內層像是「每個班級有 4 個學生」。要算出總學生數，要把 3 和 4 拿來做什麼運算？",
+                options: [
+                    { text: "A. 3 乘以 4 = 12 次", next: "q13", isCorrect: true },
+                    { text: "B. 3 加上 4 = 7 次", next: "q13_help", log: "Q13救錯: 巢狀迴圈是倍數關係！" }
+                ]
+            },
 
-            "q22": { tag: "第 22 關：控制匯流排", text: "IO/M(反相)=1、RD(反相)=1、WR(反相)=0，代表 CPU 正在做什麼？(0為動作)", options: [
-                { text: "A. 寫入 I/O 埠", next: "q23", isCorrect: true }, { text: "B. 讀取記憶體", next: "q22_help", log: "Q22錯" }
-            ]}, "q22_help": { tag: "💊 救援", text: "IO為1，WR為0(動作)，所以是？", options: [ { text: "A. 寫入 I/O", next: "q22", isCorrect: true }, { text: "B. 讀取", next: "q22_help", log: "Q22救錯" } ]},
+            // --- 第 14 關：continue ---
+            "q14": {
+                tag: "第 14 關：流程控制",
+                text: "在迴圈中，遇到哪一個指令會「跳過本回合剩下的程式碼，直接進入迴圈的下一次迭代」？",
+                options: [
+                    { text: "A. continue", next: "q15", isCorrect: true },
+                    { text: "B. break", next: "q14_help", log: "Q14錯: break 是把整個迴圈直接摧毀結束" },
+                    { text: "C. return", next: "q14_help", log: "Q14錯: 這是結束整個函式" },
+                    { text: "D. goto", next: "q14_help", log: "Q14錯: 雖然可跳躍，但不是專屬這個功能的指令" }
+                ]
+            },
+            "q14_help": {
+                tag: "💊 救援任務：繼續下一局",
+                text: "break 像是「不玩了直接回家」，而這個單字的意思是「繼續」，它只會放棄這一局剩下的動作，然後「繼續」玩下一局。是哪個英文？",
+                options: [
+                    { text: "A. continue", next: "q14", isCorrect: true },
+                    { text: "B. break", next: "q14_help", log: "Q14救錯: break 就直接跳出去了喔" }
+                ]
+            },
 
-            "q23": { tag: "第 23 關：串列傳輸", text: "I2C 含有 SCL (時脈線) 與 SDA (資料線)，它是屬於哪種傳輸？", options: [
-                { text: "A. 同步串列傳輸", next: "q24", isCorrect: true }, { text: "B. 非同步", next: "q23_help", log: "Q23錯" }
-            ]}, "q23_help": { tag: "💊 救援", text: "有「時脈線」帶著大家一起動，就是？", options: [ { text: "A. 同步", next: "q23", isCorrect: true }, { text: "B. 非同步", next: "q23_help", log: "Q23救錯" } ]},
+            // --- 第 15 關：陣列索引 ---
+            "q15": {
+                tag: "第 15 關：陣列基礎",
+                text: "宣告一個陣列 `int arr[5];`，請問這個陣列的「最後一個」元素的索引值(Index)是多少？",
+                options: [
+                    { text: "A. 4", next: "q16", isCorrect: true },
+                    { text: "B. 5", next: "q15_help", log: "Q15錯: 陣列會越界 (Out of bounds)" },
+                    { text: "C. 1", next: "q15_help", log: "Q15錯: 這是第二個元素" },
+                    { text: "D. 0", next: "q15_help", log: "Q15錯: 這是第一個元素" }
+                ]
+            },
+            "q15_help": {
+                tag: "💊 救援任務：從零開始",
+                text: "程式語言的陣列編號都是「從 0 開始」的！大小為 5 的陣列，編號會是 0, 1, 2, 3, 4。所以最後一個編號是？",
+                options: [
+                    { text: "A. 4", next: "q15", isCorrect: true },
+                    { text: "B. 5", next: "q15_help", log: "Q15救錯: 寫 5 的話程式會當機喔" }
+                ]
+            },
 
-            "q24": { tag: "第 24 關：中斷機制", text: "「中斷式 I/O」比起「程式輪詢」，最大的優點是？", options: [
-                { text: "A. 提升 CPU 效能", next: "q25", isCorrect: true }, { text: "B. 不需控制器", next: "q24_help", log: "Q24錯" }
-            ]}, "q24_help": { tag: "💊 救援", text: "有急診才通知醫生，不用一直問，能提升醫生的？", options: [ { text: "A. 工作效能", next: "q24", isCorrect: true }, { text: "B. 記憶力", next: "q24_help", log: "Q24救錯" } ]},
+            // --- 第 16 關：陣列初始化 ---
+            "q16": {
+                tag: "第 16 關：陣列初始",
+                text: "執行宣告 `int a[3] = {1};` 後，請問 `a[1]` 和 `a[2]` 的內容會是什麼？",
+                options: [
+                    { text: "A. 皆為 0", next: "q17", isCorrect: true },
+                    { text: "B. 皆為 1", next: "q16_help", log: "Q16錯: 只有 a[0] 是 1" },
+                    { text: "C. 垃圾值", next: "q16_help", log: "Q16錯: 有大括號初始化，剩下的會自動補零" },
+                    { text: "D. 程式會編譯錯誤", next: "q16_help", log: "Q16錯: 這是合法的語法" }
+                ]
+            },
+            "q16_help": {
+                tag: "💊 救援任務：自動補零",
+                text: "當我們用大括號 `{}` 給陣列初始值時，如果有沒填滿的空位，編譯器會非常貼心地幫你全部塞滿「0」。",
+                options: [
+                    { text: "A. 皆為 0", next: "q16", isCorrect: true },
+                    { text: "B. 垃圾值", next: "q16_help", log: "Q16救錯: 電腦有幫你清空成 0 啦" }
+                ]
+            },
 
-            // 🎵 流行文化 5
-            "q25": { tag: "🎵 第 25 關：K-POP ((G)I-DLE)", text: "韓國人氣女團 (G)I-DLE 中，來自台灣的泰雅族成員是？", options: [
-                { text: "A. 舒華 (Shuhua)", next: "q26", isCorrect: true }, { text: "B. 雨琦", next: "q25_help", log: "Q25錯" }, { text: "C. 薇娟", next: "q25_help", log: "Q25錯" }, { text: "D. 小娟", next: "q25_help", log: "Q25錯" }
-            ]}, "q25_help": { tag: "💊 提示", text: "全名叫「葉舒華」。", options: [ { text: "A. 舒華", next: "q25", isCorrect: true }, { text: "B. 雨琦", next: "q25_help", log: "Q25救錯" } ]},
+            // --- 第 17 關：字串結尾 ---
+            "q17": {
+                tag: "第 17 關：字串陣列",
+                text: "在 C/C++ 中，字元陣列若要被視為「字串 (String)」，其結尾必須包含哪一個特殊字元？",
+                options: [
+                    { text: "A. '\\0' (Null字元)", next: "q18", isCorrect: true },
+                    { text: "B. '\\n' (換行字元)", next: "q17_help", log: "Q17錯: 這是用來斷行的" },
+                    { text: "C. ' ' (空白字元)", next: "q17_help", log: "Q17錯: 空白只是一般字元" },
+                    { text: "D. 'EOF'", next: "q17_help", log: "Q17錯: 這是檔案結束符號" }
+                ]
+            },
+            "q17_help": {
+                tag: "💊 救援任務：字串的煞車",
+                text: "電腦必須知道字串在哪裡結束，否則會印出一堆亂碼。我們必須在結尾放一個代表「空(Null)」的特殊字元 `\\0` 來當煞車。",
+                options: [
+                    { text: "A. '\\0'", next: "q17", isCorrect: true },
+                    { text: "B. '\\n'", next: "q17_help", log: "Q17救錯: \\n 是換行(Enter)鍵的作用" }
+                ]
+            },
 
-            "q26": { tag: "第 26 關：巴克豪生準則", text: "產生穩定振盪的條件，閉迴路增益 |Aβ| 的大小為何？", options: [
-                { text: "A. |Aβ| = 1", next: "q27", isCorrect: true }, { text: "B. |Aβ| > 1", next: "q26_help", log: "Q26錯" }
-            ]}, "q26_help": { tag: "💊 救援", text: "增益必須剛剛好等於多少才能持續振盪？", options: [ { text: "A. 1", next: "q26", isCorrect: true }, { text: "B. 0", next: "q26_help", log: "Q26救錯" } ]},
+            // --- 第 18 關：無回傳值函式 ---
+            "q18": {
+                tag: "第 18 關：函式宣告",
+                text: "當自訂函式執行完畢後「不需要回傳任何結果」給主程式時，函式的回傳型態應宣告為？",
+                options: [
+                    { text: "A. void", next: "q19", isCorrect: true },
+                    { text: "B. int", next: "q18_help", log: "Q18錯: int 代表必須回傳一個整數" },
+                    { text: "C. null", next: "q18_help", log: "Q18錯: null 通常用於指標，不是型態" },
+                    { text: "D. empty", next: "q18_help", log: "Q18錯: C語言沒有這個關鍵字" }
+                ]
+            },
+            "q18_help": {
+                tag: "💊 救援任務：空無一物",
+                text: "在程式界，代表「空、無」的英文單字，常常出現在函式前面。這個字叫做 void！",
+                options: [
+                    { text: "A. void", next: "q18", isCorrect: true },
+                    { text: "B. int", next: "q18_help", log: "Q18救錯: int 代表一定要 return 數字喔" }
+                ]
+            },
 
-            "q27": { tag: "第 27 關：RC 網路", text: "RC 相移振盪器通常用 3 節 RC 網路，每節提供多少相移？", options: [
-                { text: "A. 60°", next: "q28", isCorrect: true }, { text: "B. 90°", next: "q27_help", log: "Q27錯" }
-            ]}, "q27_help": { tag: "💊 救援", text: "總共需要 180°，除以 3 節 = ?", options: [ { text: "A. 60°", next: "q27", isCorrect: true }, { text: "B. 90°", next: "q27_help", log: "Q27救錯" } ]},
+            // --- 第 19 關：陣列傳遞 ---
+            "q19": {
+                tag: "第 19 關：參數傳遞",
+                text: "將「一維陣列」當作參數傳遞給函式時，實際上傳遞給函式的是什麼東西？",
+                options: [
+                    { text: "A. 陣列第一個元素的記憶體位址 (Call by address)", next: "q20", isCorrect: true },
+                    { text: "B. 整個陣列所有元素的備份 (Call by value)", next: "q19_help", log: "Q19錯: 這樣太耗費記憶體了" },
+                    { text: "C. 陣列的長度大小", next: "q19_help", log: "Q19錯: 長度通常要另外傳一個參數" },
+                    { text: "D. 陣列最後一個元素的值", next: "q19_help", log: "Q19錯: 完全無意義" }
+                ]
+            },
+            "q19_help": {
+                tag: "💊 救援任務：傳遞門牌號碼",
+                text: "陣列可能有一萬筆資料，拷貝一份給函式太浪費時間了。所以我們只給函式「第一筆資料的門牌號碼(位址)」，讓函式自己去找。",
+                options: [
+                    { text: "A. 第一個元素的記憶體位址", next: "q19", isCorrect: true },
+                    { text: "B. 整個陣列的拷貝", next: "q19_help", log: "Q19救錯: 拷貝整個陣列會讓電腦效能變極差" }
+                ]
+            },
 
-            "q28": { tag: "第 28 關：石英晶體", text: "石英晶體振盪器頻率極度穩定，是因為它具有什麼特性？", options: [
-                { text: "A. 壓電效應，Q值極高", next: "q29", isCorrect: true }, { text: "B. 光電效應", next: "q28_help", log: "Q28錯" }
-            ]}, "q28_help": { tag: "💊 救援", text: "通電產生機械震動稱為？", options: [ { text: "A. 壓電效應", next: "q28", isCorrect: true }, { text: "B. 溫室效應", next: "q28_help", log: "Q28救錯" } ]},
+            // --- 第 20 關：變數作用域 ---
+            "q20": {
+                tag: "第 20 關：變數範圍",
+                text: "在函式 (Function)「內部」宣告的變數，其生命週期只活在這個函式裡。這稱為什麼變數？",
+                options: [
+                    { text: "A. 區域變數 (Local variable)", next: "q21", isCorrect: true },
+                    { text: "B. 全域變數 (Global variable)", next: "q20_help", log: "Q20錯: 宣告在所有函式外部的才是全域" },
+                    { text: "C. 靜態變數 (Static variable)", next: "q20_help", log: "Q20錯: 靜態變數的生命週期會延續到程式結束" },
+                    { text: "D. 外部變數 (Extern variable)", next: "q20_help", log: "Q20錯: 這是用來引用別的檔案的變數" }
+                ]
+            },
+            "q20_help": {
+                tag: "💊 救援任務：特定範圍",
+                text: "只能在「特定區域 (大括號裡面)」使用的變數，一旦離開這個括號就會被消滅。所以它叫做什麼變數？",
+                options: [
+                    { text: "A. 區域變數 (Local)", next: "q20", isCorrect: true },
+                    { text: "B. 全域變數 (Global)", next: "q20_help", log: "Q20救錯: 全域是大家都能共用的" }
+                ]
+            },
 
-            "q29": { tag: "第 29 關：樞密特觸發器", text: "樞密特觸發器具有遲滯特性，最主要的用途是？", options: [
-                { text: "A. 波形整型 (轉為方波)", next: "q30", isCorrect: true }, { text: "B. 放大微波", next: "q29_help", log: "Q29錯" }
-            ]}, "q29_help": { tag: "💊 救援", text: "用來消除雜訊，把亂七八糟的波變成漂亮的？", options: [ { text: "A. 方波", next: "q29", isCorrect: true }, { text: "B. 弦波", next: "q29_help", log: "Q29救錯" } ]},
+            // --- 第 21 關：全域變數預設值 ---
+            "q21": {
+                tag: "第 21 關：全域變數",
+                text: "在程式最上方宣告的「全域變數 (Global variable)」，如果沒有給予初始值，編譯器預設會給它什麼值？",
+                options: [
+                    { text: "A. 0", next: "q22", isCorrect: true },
+                    { text: "B. 垃圾值 (Garbage value)", next: "q21_help", log: "Q21錯: 這是區域變數的特性" },
+                    { text: "C. -1", next: "q21_help", log: "Q21錯: 不會給 -1" },
+                    { text: "D. 編譯錯誤", next: "q21_help", log: "Q21錯: 語法是合法的" }
+                ]
+            },
+            "q21_help": {
+                tag: "💊 救援任務：全域的禮遇",
+                text: "跟區域變數充滿垃圾值不同，全域變數享有 VIP 待遇，系統在程式一開始就會自動幫它「清空歸零」。",
+                options: [
+                    { text: "A. 0", next: "q21", isCorrect: true },
+                    { text: "B. 垃圾值", next: "q21_help", log: "Q21救錯: 區域變數才是垃圾值" }
+                ]
+            },
 
-            // 🐉 流行文化 6 (最終題)
-            "q30": { tag: "🐉 最終關：手遊時間 (Pokémon GO)", text: "在手遊《Pokémon GO》中，如果想要捕捉到神獸（如洛奇亞、裂空座），通常需要參加哪一種活動？", options: [
-                { text: "A. 團體戰 (Raid Battle)", next: "end", isCorrect: true }, { text: "B. 孵蛋", next: "q30_help", log: "Q30錯" }, { text: "C. 旋轉補給站", next: "q30_help", log: "Q30錯" }, { text: "D. 傳送禮物給好友", next: "q30_help", log: "Q30錯" }
-            ]}, "q30_help": { tag: "💊 提示", text: "神獸血量很高，需要很多玩家「揪團」一起打。那叫什麼戰？", options: [ { text: "A. 團體戰", next: "q30", isCorrect: true }, { text: "B. 道館防守", next: "q30_help", log: "Q30救錯" } ]}
+            // --- 第 22 關：遞迴 ---
+            "q22": {
+                tag: "第 22 關：進階函式",
+                text: "一個函式在執行的過程中，又「呼叫自己本身」，這種程式設計技巧稱為什麼？",
+                options: [
+                    { text: "A. 遞迴 (Recursion)", next: "q23", isCorrect: true },
+                    { text: "B. 迭代 (Iteration)", next: "q22_help", log: "Q22錯: 這是指使用 for 或 while 迴圈" },
+                    { text: "C. 多載 (Overloading)", next: "q22_help", log: "Q22錯: 這是指同名但參數不同的函式" },
+                    { text: "D. 覆寫 (Overriding)", next: "q22_help", log: "Q22錯: 這是物件導向中子類別改寫父類別" }
+                ]
+            },
+            "q22_help": {
+                tag: "💊 救援任務：俄羅斯娃娃",
+                text: "就像俄羅斯娃娃一樣，打開裡面還有一個自己；函式呼叫自己，在資電類統測中，這招叫做「遞迴」。",
+                options: [
+                    { text: "A. 遞迴 (Recursion)", next: "q22", isCorrect: true },
+                    { text: "B. 迭代 (Iteration)", next: "q22_help", log: "Q22救錯: 迭代是寫迴圈的意思" }
+                ]
+            },
+
+            // --- 第 23 關：取址運算子 ---
+            "q23": {
+                tag: "第 23 關：指標基礎",
+                text: "若宣告 `int a = 10;`，想取得變數 a 儲存在記憶體中的「位址(Address)」，要使用哪一個運算子？",
+                options: [
+                    { text: "A. &", next: "q24", isCorrect: true },
+                    { text: "B. *", next: "q23_help", log: "Q23錯: 這是取值(解參照)運算子" },
+                    { text: "C. %", next: "q23_help", log: "Q23錯: 這是取餘數" },
+                    { text: "D. ->", next: "q23_help", log: "Q23錯: 這是結構指標存取成員用的" }
+                ]
+            },
+            "q23_help": {
+                tag: "💊 救援任務：Address的符號",
+                text: "英文的 And 符號 `&`，在 C 語言的指標世界裡，叫做「取址運算子 (Address-of)」。星號 `*` 則是用來解開位址拿東西的。",
+                options: [
+                    { text: "A. &", next: "q23", isCorrect: true },
+                    { text: "B. *", next: "q23_help", log: "Q23救錯: * 是用來宣告指標或取值的" }
+                ]
+            },
+
+            // --- 第 24 關：複合指派 ---
+            "q24": {
+                tag: "第 24 關：簡寫語法",
+                text: "程式敘述 `x += 3;` 完全等價於下列哪一種寫法？",
+                options: [
+                    { text: "A. x = x + 3;", next: "q25", isCorrect: true },
+                    { text: "B. x = 3 + 3;", next: "q24_help", log: "Q24錯: 丟失了 x 原本的值" },
+                    { text: "C. x = x + 1;", next: "q24_help", log: "Q24錯: 這是 x++" },
+                    { text: "D. x = 3;", next: "q24_help", log: "Q24錯: 這是直接指派" }
+                ]
+            },
+            "q24_help": {
+                tag: "💊 救援任務：加並指派",
+                text: "`+=` 的意思是：把右邊的數字，加上原本的自己，然後重新存回自己身上。也就是 `自己 = 自己 + 3`。",
+                options: [
+                    { text: "A. x = x + 3;", next: "q24", isCorrect: true },
+                    { text: "B. x = 3;", next: "q24_help", log: "Q24救錯: 這樣寫 x 原本的數字就不見了" }
+                ]
+            },
+
+            // --- 第 25 關：強制轉型 ---
+            "q25": {
+                tag: "第 25 關：型態轉換",
+                text: "執行強制型態轉換 `(int) 3.84`，得到的結果為何？",
+                options: [
+                    { text: "A. 3", next: "q26", isCorrect: true },
+                    { text: "B. 4", next: "q25_help", log: "Q25錯: 轉成 int 不會四捨五入" },
+                    { text: "C. 3.8", next: "q25_help", log: "Q25錯: int 不能有小數點" },
+                    { text: "D. 0", next: "q25_help", log: "Q25錯: 值不會憑空消失" }
+                ]
+            },
+            "q25_help": {
+                tag: "💊 救援任務：無情捨去",
+                text: "把浮點數(小數)強制變成整數(int)時，電腦不會幫你四捨五入，而是直接拿刀把小數點後面全部「無情砍掉」。",
+                options: [
+                    { text: "A. 3", next: "q25", isCorrect: true },
+                    { text: "B. 4", next: "q25_help", log: "Q25救錯: 電腦沒有四捨五入這麼聰明" }
+                ]
+            },
+
+            // --- 第 26 關：三元運算子 ---
+            "q26": {
+                tag: "第 26 關：條件簡寫",
+                text: "執行三元運算子 `int max = (10 > 5) ? 100 : 200;` 後，max 的值為何？",
+                options: [
+                    { text: "A. 100", next: "q27", isCorrect: true },
+                    { text: "B. 200", next: "q26_help", log: "Q26錯: 條件成立會選冒號左邊的" },
+                    { text: "C. 10", next: "q26_help", log: "Q26錯: 10只是條件" },
+                    { text: "D. 5", next: "q26_help", log: "Q26錯: 5只是條件" }
+                ]
+            },
+            "q26_help": {
+                tag: "💊 救援任務：問號與冒號",
+                text: "語法是 `條件 ? 對的話選這個 : 錯的話選這個`。因為 10 大於 5 是對的(True)，所以會挑選冒號「左邊」的數字。",
+                options: [
+                    { text: "A. 100", next: "q26", isCorrect: true },
+                    { text: "B. 200", next: "q26_help", log: "Q26救錯: 條件是對的，不能選右邊" }
+                ]
+            },
+
+            // --- 第 27 關：位元運算 ---
+            "q27": {
+                tag: "第 27 關：位元操作",
+                text: "執行位元及 (Bitwise AND) 運算：`5 & 3` 的十進制結果為何？(提示：5是101，3是011)",
+                options: [
+                    { text: "A. 1", next: "q28", isCorrect: true },
+                    { text: "B. 7", next: "q27_help", log: "Q27錯: 這是位元 OR (|) 的結果" },
+                    { text: "C. 8", next: "q27_help", log: "Q27錯: 這不是普通的加法" },
+                    { text: "D. 6", next: "q27_help", log: "Q27錯: 這是位元 XOR (^) 的結果" }
+                ]
+            },
+            "q27_help": {
+                tag: "💊 救援任務：上下對齊 AND",
+                text: "101 和 011 上下對齊做 AND(兩個都是1才是1)。第一位1&0=0，第二位0&1=0，第三位1&1=1。得出二進制 001，也就是十進制的多少？",
+                options: [
+                    { text: "A. 1", next: "q27", isCorrect: true },
+                    { text: "B. 7", next: "q27_help", log: "Q27救錯: 這是 OR 才會變 111 (7)" }
+                ]
+            },
+
+            // --- 第 28 關：結構體存取 ---
+            "q28": {
+                tag: "第 28 關：自訂資料",
+                text: "宣告一個結構實體 `struct Student s1;`，要存取裡面的成員 `age`，正確寫法是？",
+                options: [
+                    { text: "A. s1.age", next: "q29", isCorrect: true },
+                    { text: "B. s1->age", next: "q28_help", log: "Q28錯: 這是指標變數才用的箭頭" },
+                    { text: "C. s1(age)", next: "q28_help", log: "Q28錯: 括號是呼叫函式" },
+                    { text: "D. s1[age]", next: "q28_help", log: "Q28錯: 中括號是用在陣列" }
+                ]
+            },
+            "q28_help": {
+                tag: "💊 救援任務：點還是箭頭",
+                text: "對於「普通的結構實體」，我們使用小數點「`.`」來存取成員。如果是「結構指標」，才要用箭頭「`->`」。",
+                options: [
+                    { text: "A. s1.age", next: "q28", isCorrect: true },
+                    { text: "B. s1->age", next: "q28_help", log: "Q28救錯: 這裡沒有宣告指標喔！" }
+                ]
+            },
+
+            // --- 第 29 關：常數 ---
+            "q29": {
+                tag: "第 29 關：唯讀變數",
+                text: "想要宣告一個「只讀不寫 (不能被修改)」的常數變數 (例如圓周率)，應該加上哪一個關鍵字？",
+                options: [
+                    { text: "A. const", next: "q30", isCorrect: true },
+                    { text: "B. static", next: "q29_help", log: "Q29錯: static 只是讓變數活得比較久，還是能改" },
+                    { text: "C. void", next: "q29_help", log: "Q29錯: void 代表沒有型態" },
+                    { text: "D. unsigned", next: "q29_help", log: "Q29錯: 這是無號數(沒有負數)的意思" }
+                ]
+            },
+            "q29_help": {
+                tag: "💊 救援任務：Constant",
+                text: "常數的英文是 Constant。在程式中，我們取前 5 個字母作為保護變數不被修改的鎖。是哪個字？",
+                options: [
+                    { text: "A. const", next: "q29", isCorrect: true },
+                    { text: "B. static", next: "q29_help", log: "Q29救錯: static 是靜態的意思" }
+                ]
+            },
+
+            // --- 第 30 關：運算子優先權 ---
+            "q30": {
+                tag: "第 30 關：最終魔王 (優先權)",
+                text: "根據 C/C++ 的運算子優先權規則，執行 `2 + 3 * 4` 會得到什麼結果？",
+                options: [
+                    { text: "A. 14", next: "end", isCorrect: true },
+                    { text: "B. 20", next: "q30_help", log: "Q30錯: 不能由左到右傻傻加" },
+                    { text: "C. 24", next: "q30_help", log: "Q30錯: 亂猜的" },
+                    { text: "D. 9", next: "q30_help", log: "Q30錯: 亂猜的" }
+                ]
+            },
+            "q30_help": {
+                tag: "💊 救援任務：先乘除後加減",
+                text: "程式跟數學一樣，遵守「先乘除，後加減」的鐵則！請先算 3 乘以 4，再加上 2。",
+                options: [
+                    { text: "A. 14", next: "q30", isCorrect: true },
+                    { text: "B. 20", next: "q30_help", log: "Q30救錯: 這是先加 2+3=5，才乘 4，錯啦！" }
+                ]
+            }
         };
 
         // ==========================================
@@ -362,9 +839,11 @@
         let startTime = 0;           
         let totalTime = 0;           
         let rescueTriggered = 0;     
-        let rescueFails = 0;         
+        let rescueFails = 0;
+	let isTransitioning = false; // 🚨 新增這行：防連點的鎖定開關
 
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwFB06xxuJtRZdqkc-LcVJEfgsEyI1Dn3R5k6M1sEafiDIsxFx2cDchDTJBglvYVhmVZA/exec';
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwQnum1bAGvOb-dv5hL08S0pzMB93_gN0ZmoqCQtUjKFYOT-vs8Df0iTT6OMpx_sb6pjg/exec';
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -489,6 +968,8 @@
         }
 
         function renderQuestion() {
+
+	isTransitioning = false; // 🚨 新增這行：題目載入完成，解鎖按鈕
             if (currentStep === "end") { finishGame(); return; }
             const q = quizData[currentStep];
             document.getElementById('q-tag').innerText = q.tag;
@@ -525,6 +1006,8 @@
         }
 
         function handleAnswer(selectedOption) {
+	if (isTransitioning) return; 
+            isTransitioning = true; // 立刻上鎖
             let isRescueQuestion = currentStep.includes("_help"); 
 
             if (!selectedOption.isCorrect) {
@@ -663,8 +1146,43 @@
             formData.append('errorCount', errorCount);
             formData.append('errorDetails', errorDetails);
             formData.append('cards', cards);
-            
+            // 🚨 新增：抓取該學生目前的完整圖鑑，轉成文字一起傳到 Google 表單
+            let storageKey = "gachaCollection_" + name;
+            let fullCollection = localStorage.getItem(storageKey) || "[]";
+            formData.append('fullCollection', fullCollection);
             fetch(scriptURL, { method: 'POST', body: formData });
+        }
+// 🚨 新增：雲端讀檔功能 
+        async function syncCloudData() {
+            let inputName = document.getElementById('student-name').value.trim();
+            if(!inputName) { alert("⚠️ 請先輸入您的姓名，才能尋找雲端存檔喔！"); return; }
+
+            // 讓按鈕顯示載入中，避免重複點擊
+            let syncBtn = document.getElementById('btn-sync');
+            let originalText = syncBtn.innerText;
+            syncBtn.innerText = "⏳ 雲端同步中，請稍候...";
+            syncBtn.disabled = true;
+
+            try {
+                // 向 Google Apps Script 發送 GET 請求讀取資料
+                let response = await fetch(scriptURL + "?name=" + encodeURIComponent(inputName), { method: "GET" });
+                let result = await response.json();
+
+                if(result.status === "success") {
+                    // 成功抓到資料，覆蓋掉當前電腦的記憶體
+                    localStorage.setItem("gachaCollection_" + inputName, result.data);
+                    alert("✅ 雲端同步成功！已為您載入最新的圖鑑進度！\n您可以點擊「查看我的圖鑑」確認。");
+                } else {
+                    alert("🆕 找不到您的雲端存檔。\n如果您是第一次玩，這是正常的，系統將為您建立全新圖鑑！");
+                }
+            } catch(e) {
+                alert("❌ 同步失敗，請檢查網路連線或稍後再試。");
+                console.error(e);
+            } finally {
+                // 恢復按鈕狀態
+                syncBtn.innerText = originalText;
+                syncBtn.disabled = false;
+            }
         }
     </script>
 </body>
