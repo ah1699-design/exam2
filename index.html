@@ -222,610 +222,610 @@
         ];
 
         // ==========================================
-        // 教師設定區：資電類 程式語言設計 (30題連擊大補帖)
+        // 教師設定區：電子學 (555、波形產生器、濾波器) + 指定娛樂穿插
+        // 圖片請確保與 HTML 檔案放在同一層目錄 (或自行加上路徑)
         // ==========================================
         const quizData = {
-            // --- 第 1 關：變數命名 ---
+            // --- 第 1 關：555單穩態電路識別 ---
             "q1": {
-                tag: "第 1 關：基礎語法",
-                text: "在 C/C++ 等主流程式語言中，下列何者是「合法」的變數名稱？",
+                tag: "第 1 關：555計時器",
+                text: "觀察下圖，這是一個利用 555 計時器構成的什麼電路？<br><br><img src='uni.png' style='width:100%; max-width:300px; border-radius:8px;'>",
                 options: [
-                    { text: "A. _score", next: "q2", isCorrect: true },
-                    { text: "B. 2nd_place", next: "q1_help", log: "Q1錯: 變數不能以數字開頭" },
-                    { text: "C. int", next: "q1_help", log: "Q1錯: 不能使用系統保留字" },
-                    { text: "D. my-name", next: "q1_help", log: "Q1錯: 減號是運算子，只能用底線" }
+                    { text: "A. 單穩態多諧振盪器 (Monostable)", next: "q2", isCorrect: true },
+                    { text: "B. 無穩態多諧振盪器 (Astable)", next: "q1_help", log: "Q1錯: 腳位接法不對，無穩態的2和6腳會接在一起" },
+                    { text: "C. 雙穩態多諧振盪器 (Bistable)", next: "q1_help", log: "Q1錯: 555通常不做純雙穩態" },
+                    { text: "D. 施密特觸發器", next: "q1_help", log: "Q1錯: 施密特觸發器的接法不同" }
                 ]
             },
             "q1_help": {
-                tag: "💊 救援任務：命名規則",
-                text: "變數名稱只能由「英文字母、數字、底線」組成，而且「絕對不可以」用數字開頭！請選出唯一符合規則的選項：",
+                tag: "💊 救援任務：看圖辨識",
+                text: "圖中的第(2)腳接了一個開關(SW)用來「觸發」，且只有一個電阻 R 和電容 C 決定時間。需要外面推一下才動作的，是哪種振盪器？",
                 options: [
-                    { text: "A. _score (底線開頭合法)", next: "q1", isCorrect: true }, 
-                    { text: "B. 2nd_place", next: "q1_help", log: "Q1救錯: 數字開頭直接報錯喔" } 
+                    { text: "A. 單穩態 (戳一下動一次)", next: "q1", isCorrect: true }, 
+                    { text: "B. 無穩態 (自己會一直震)", next: "q1_help", log: "Q1救錯: 無穩態不需要按鈕開關喔" } 
                 ]
             },
 
-            // --- 第 2 關：資料型態 ---
+            // --- 第 2 關：555單穩態脈波寬度 ---
             "q2": {
-                tag: "第 2 關：資料型態",
-                text: "一般在 32 位元以上的系統中，宣告一個標準整數變數 `int`，通常會在記憶體中佔用多少位元組 (Bytes)？",
+                tag: "第 2 關：單穩態公式",
+                text: "承上題的單穩態電路，當按下 SW 觸發後，輸出 Vo 會維持高電位一段時間 (tw)。請問脈波寬度 tw 的近似公式為何？",
                 options: [
-                    { text: "A. 4 Bytes", next: "q3", isCorrect: true },
-                    { text: "B. 1 Byte", next: "q2_help", log: "Q2錯: 這是字元 char 的大小" },
-                    { text: "C. 2 Bytes", next: "q2_help", log: "Q2錯: 這是短整數 short 的大小" },
-                    { text: "D. 8 Bytes", next: "q2_help", log: "Q2錯: 這是雙倍精度浮點數 double 的大小" }
+                    { text: "A. tw ≈ 1.1 RC", next: "q3", isCorrect: true },
+                    { text: "B. tw ≈ 0.693 RC", next: "q2_help", log: "Q2錯: 這是無穩態充放電的係數" },
+                    { text: "C. tw ≈ 1 / (2πRC)", next: "q2_help", log: "Q2錯: 這是濾波器的截止頻率公式" },
+                    { text: "D. tw ≈ RC", next: "q2_help", log: "Q2錯: 漏了常數" }
                 ]
             },
             "q2_help": {
-                tag: "💊 救援任務：記憶體空間",
-                text: "記憶體大小口訣：字元(char)最輕巧佔 1 Byte，標準整數(int)與單精度浮點數(float)都是它的 4 倍。所以 `int` 佔幾 Bytes？",
+                tag: "💊 救援任務：充放電常數",
+                text: "單穩態電路中，電容從 0V 充電到 2/3 Vcc，根據 RC 充放電公式換算，前面的常數大約是「1.1」。請選出有 1.1 的公式：",
                 options: [
-                    { text: "A. 4 Bytes", next: "q2", isCorrect: true }, 
-                    { text: "B. 1 Byte", next: "q2_help", log: "Q2救錯: 1 Byte 只能存一個英文字母喔" } 
+                    { text: "A. 1.1 RC", next: "q2", isCorrect: true }, 
+                    { text: "B. 0.693 RC", next: "q2_help", log: "Q2救錯: 0.693 是充到一半(ln2)的係數" } 
                 ]
             },
 
-            // --- 第 3 關：初始值 ---
+            // --- 第 3 關：555無穩態電路識別 ---
             "q3": {
-                tag: "第 3 關：變數宣告",
-                text: "執行程式碼 `int a = 5, b;` 後，此時變數 `b` 的值為何？",
+                tag: "第 3 關：555計時器",
+                text: "觀察下圖，第 2 腳與第 6 腳短接，這是一個利用 555 構成的什麼電路？<br><br><img src='uns.png' style='width:100%; max-width:250px; border-radius:8px;'>",
                 options: [
-                    { text: "A. 無法預測的垃圾值 (Garbage value)", next: "q4", isCorrect: true },
-                    { text: "B. 5", next: "q3_help", log: "Q3錯: 只有 a 被賦予 5" },
-                    { text: "C. 0", next: "q3_help", log: "Q3錯: 區域變數不會自動歸零" },
-                    { text: "D. 程式會直接當機", next: "q3_help", log: "Q3錯: 語法合法，不會當機，只是 b 內容未知" }
+                    { text: "A. 無穩態多諧振盪器 (Astable)", next: "q4", isCorrect: true },
+                    { text: "B. 單穩態多諧振盪器 (Monostable)", next: "q3_help", log: "Q3錯: 單穩態有觸發開關" },
+                    { text: "C. 帶通濾波器", next: "q3_help", log: "Q3錯: 濾波器通常用 OPA" },
+                    { text: "D. 三角波產生器", next: "q3_help", log: "Q3錯: 555輸出是方波/脈波" }
                 ]
             },
             "q3_help": {
-                tag: "💊 救援任務：未初始化的危險",
-                text: "在函式內部宣告的區域變數，如果「沒有」給它等號設定初始值，系統就會把那塊記憶體前一個人留下的殘留資料給它。這稱為什麼？",
+                tag: "💊 救援任務：自給自足",
+                text: "圖中沒有外部按鈕，電容 C 透過 R1、R2 充電，再透過 R2 放電，不斷循環。這種不需要外面推，自己會一直震盪的電路叫什麼？",
                 options: [
-                    { text: "A. 垃圾值 (Garbage value)", next: "q3", isCorrect: true }, 
-                    { text: "B. 0", next: "q3_help", log: "Q3救錯: C/C++ 不會這麼貼心幫你歸零" } 
+                    { text: "A. 無穩態", next: "q3", isCorrect: true }, 
+                    { text: "B. 單穩態", next: "q3_help", log: "Q3救錯: 單穩態不會自己一直震盪" } 
                 ]
             },
 
-            // --- 第 4 關：整數除法 ---
+            // --- 第 4 關：555無穩態工作週期 ---
             "q4": {
-                tag: "第 4 關：算術運算",
-                text: "在 C/C++ 中，執行運算式 `7 / 2`，其運算結果為何？",
+                tag: "第 4 關：無穩態特性",
+                text: "承上題圖中的無穩態電路，充電時經過 (R1+R2)，放電時只經過 R2。請問此標準接法輸出的「工作週期 (Duty Cycle)」範圍為何？",
                 options: [
-                    { text: "A. 3", next: "q5", isCorrect: true },
-                    { text: "B. 3.5", next: "q4_help", log: "Q4錯: 兩邊都是整數，小數點會被無情捨去" },
-                    { text: "C. 4", next: "q4_help", log: "Q4錯: 不會四捨五入" },
-                    { text: "D. 1", next: "q4_help", log: "Q4錯: 這是取餘數(%)的結果" }
+                    { text: "A. 恆大於 50%", next: "q5", isCorrect: true },
+                    { text: "B. 恆等於 50%", next: "q4_help", log: "Q4錯: 因為充電電阻一定比放電電阻大" },
+                    { text: "C. 恆小於 50%", next: "q4_help", log: "Q4錯: 這樣代表放電比充電慢，但圖中放電只過R2" },
+                    { text: "D. 可以在 0%~100% 任意調整", next: "q4_help", log: "Q4錯: 需要外加二極體才能做到" }
                 ]
             },
             "q4_help": {
-                tag: "💊 救援任務：整數的堅持",
-                text: "當「整數」除以「整數」時，電腦會非常固執，計算結果也絕對只能是「整數」，小數點後面的數字會直接被砍掉！7 除以 2 的商數是多少？",
+                tag: "💊 救援任務：充慢放快",
+                text: "工作週期 = (充電時間 / 總時間)。充電路徑是 R1+R2，放電路徑只有 R2。因為 R1+R2 絕對大於 R2，充電時間比較長，所以工作週期一定會大於多少？",
                 options: [
-                    { text: "A. 3", next: "q4", isCorrect: true }, 
-                    { text: "B. 3.5", next: "q4_help", log: "Q4救錯: 記得把小數點無情砍掉！" } 
+                    { text: "A. 50%", next: "q4", isCorrect: true }, 
+                    { text: "B. 25%", next: "q4_help", log: "Q4救錯: 不可能小於 50% 啦" } 
                 ]
             },
 
-            // --- 第 5 關：取餘數 ---
+            // 🌟 第 5 關：娛樂穿插 (JOJO)
             "q5": {
-                tag: "第 5 關：算術運算",
-                text: "運算式 `14 % 4` (取餘數運算子) 的結果為何？",
+                tag: "🌟 第 5 關：大腦休息 (動漫)",
+                text: "來點輕鬆的！在《JOJO的奇妙冒險》第三部中，主角空条承太郎的替身名稱是？",
                 options: [
-                    { text: "A. 2", next: "q6", isCorrect: true },
-                    { text: "B. 3", next: "q5_help", log: "Q5錯: 這是 14 除以 4 的商數" },
-                    { text: "C. 3.5", next: "q5_help", log: "Q5錯: % 只能用於整數找餘數" },
-                    { text: "D. 0", next: "q5_help", log: "Q5錯: 14 不能被 4 整除" }
+                    { text: "A. 白金之星", next: "q6", isCorrect: true },
+                    { text: "B. 瘋狂鑽石", next: "q5_help", log: "Q5錯: 這是第四部東方仗助的替身" },
+                    { text: "C. 黃金體驗", next: "q5_help", log: "Q5錯: 這是第五部喬魯諾的替身" },
+                    { text: "D. 隱者之紫", next: "q5_help", log: "Q5錯: 這是喬瑟夫的替身" }
                 ]
             },
             "q5_help": {
-                tag: "💊 救援任務：小學除法",
-                text: "「%」這個符號不是百分比，在程式裡叫做「取餘數」。14 除以 4，等於 3 ... 餘下多少？",
+                tag: "💊 提示：歐拉歐拉",
+                text: "他最喜歡喊「歐拉歐拉」，且名字跟星星(Star)有關。請選出正確的替身名稱：",
                 options: [
-                    { text: "A. 餘 2", next: "q5", isCorrect: true },
-                    { text: "B. 餘 3", next: "q5_help", log: "Q5救錯: 4 乘以 3 是 12，14 減 12 是 2 啦" }
+                    { text: "A. 白金之星", next: "q5", isCorrect: true },
+                    { text: "B. 瘋狂鑽石", next: "q5_help", log: "Q5救錯: 鑽石是第四部主角的啦！" }
                 ]
             },
 
-            // --- 第 6 關：遞增運算子 ---
+            // --- 第 6 關：方波產生器 ---
             "q6": {
-                tag: "第 6 關：遞增運算",
-                text: "執行 `int x = 5; int y = x++;` 之後，x 與 y 的值分別為何？",
+                tag: "第 6 關：波形產生",
+                text: "觀察下圖，這是一個使用運算放大器 (OPA) 構成的振盪電路，請問輸出 Vo 的波形為何？<br><br><img src='sqr.png' style='width:100%; max-width:250px; border-radius:8px;'>",
                 options: [
-                    { text: "A. x = 6, y = 5", next: "q7", isCorrect: true },
-                    { text: "B. x = 6, y = 6", next: "q6_help", log: "Q6錯: 這是 ++x (前置遞增) 的結果" },
-                    { text: "C. x = 5, y = 5", next: "q6_help", log: "Q6錯: x 一定會加 1" },
-                    { text: "D. x = 5, y = 6", next: "q6_help", log: "Q6錯: 完全搞反了" }
+                    { text: "A. 方波", next: "q7", isCorrect: true },
+                    { text: "B. 正弦波", next: "q6_help", log: "Q6錯: 這是由施密特觸發器改裝的，輸出只有飽和電壓" },
+                    { text: "C. 三角波", next: "q6_help", log: "Q6錯: 三角波需要有獨立的積分器" },
+                    { text: "D. 鋸齒波", next: "q6_help", log: "Q6錯: 不具備充放電不對稱的特性" }
                 ]
             },
             "q6_help": {
-                tag: "💊 救援任務：後置遞增",
-                text: "「x++」是後置遞增，口訣是「先做事，後加一」。所以 y 會先拿到 x 原本的值(5)，然後 x 自己才偷偷變成 6。所以 y 是多少？",
+                tag: "💊 救援任務：正回授與飽和",
+                text: "圖中 OPA 的輸出拉回了「正端(+)」，這代表它是一個施密特觸發器。正回授的 OPA 輸出只會卡在最高(+Vsat)和最低(-Vsat)，跳來跳去會畫出什麼波形？",
                 options: [
-                    { text: "A. y = 5 (x 變成 6)", next: "q6", isCorrect: true },
-                    { text: "B. y = 6 (x 變成 6)", next: "q6_help", log: "Q6救錯: 這是 ++x 才會發生的事" }
+                    { text: "A. 方波 (直上直下)", next: "q6", isCorrect: true },
+                    { text: "B. 正弦波", next: "q6_help", log: "Q6救錯: 正弦波需要負回授與相移網路" }
                 ]
             },
 
-            // --- 第 7 關：關係運算子 ---
+            // --- 第 7 關：方波週期影響 ---
             "q7": {
-                tag: "第 7 關：關係判斷",
-                text: "在條件判斷中，用來檢查「左右兩邊是否相等」的運算子是哪一個？",
+                tag: "第 7 關：振盪週期",
+                text: "承上題的方波產生器，電容 C 透過電阻 R 進行充放電。如果想「降低」輸出的振盪頻率（變慢），下列哪個做法有效？",
                 options: [
-                    { text: "A. ==", next: "q8", isCorrect: true },
-                    { text: "B. =", next: "q7_help", log: "Q7錯: 一個等號是『指定(賦值)』" },
-                    { text: "C. !=", next: "q7_help", log: "Q7錯: 這是『不等於』" },
-                    { text: "D. <>", next: "q7_help", log: "Q7錯: 這是 SQL 或 VB 的語法，C/C++ 不用這個" }
+                    { text: "A. 增加電容 C 的容值", next: "q8", isCorrect: true },
+                    { text: "B. 減少電容 C 的容值", next: "q7_help", log: "Q7錯: 容值變小，充放電變快，頻率會升高" },
+                    { text: "C. 減少電阻 R 的阻值", next: "q7_help", log: "Q7錯: 阻值變小，電流變大，頻率會升高" },
+                    { text: "D. 將 R1 與 R2 短路", next: "q7_help", log: "Q7錯: 這樣就沒有遲滯區間，無法正常震盪" }
                 ]
             },
             "q7_help": {
-                tag: "💊 救援任務：雙重確認",
-                text: "在程式裡，單一一個 `=` 是把右邊的東西塞給左邊。如果要問電腦「這兩個一樣嗎？」，必須使用「兩個」等號！",
+                tag: "💊 救援任務：大水缸理論",
+                text: "頻率變慢，代表充電和放電要花「更久的時間」。把電容想成水缸，水缸越大，裝滿水需要的時間就越久。所以要？",
                 options: [
-                    { text: "A. ==", next: "q7", isCorrect: true },
-                    { text: "B. =", next: "q7_help", log: "Q7救錯: 單一等號是拿來存資料的" }
+                    { text: "A. 增加電容 C", next: "q7", isCorrect: true },
+                    { text: "B. 減少電容 C", next: "q7_help", log: "Q7救錯: 水缸變小馬上就滿了，頻率會變快！" }
                 ]
             },
 
-            // --- 第 8 關：邏輯運算子 ---
+            // --- 第 8 關：三角波產生器識別 ---
             "q8": {
-                tag: "第 8 關：邏輯運算",
-                text: "運算式 `(5 > 3) && (2 < 1)` 的布林(Boolean)結果為何？",
+                tag: "第 8 關：波形產生",
+                text: "觀察下圖，這個電路串聯了兩個 OPA，用來產生三角波。請問前級 OPA1 與後級 OPA2 分別扮演什麼角色？<br><br><img src='tri.png' style='width:100%; max-width:350px; border-radius:8px;'>",
                 options: [
-                    { text: "A. False (假 / 0)", next: "q9", isCorrect: true },
-                    { text: "B. True (真 / 1)", next: "q8_help", log: "Q8錯: 後半部的 2 < 1 是錯的" },
-                    { text: "C. 5", next: "q8_help", log: "Q8錯: 邏輯運算結果只會是真或假" },
-                    { text: "D. 1", next: "q8_help", log: "Q8錯: 1 代表 True" }
+                    { text: "A. OPA1：施密特觸發器，OPA2：積分器", next: "q9", isCorrect: true },
+                    { text: "B. OPA1：積分器，OPA2：施密特觸發器", next: "q8_help", log: "Q8錯: 順序反了" },
+                    { text: "C. OPA1：微分器，OPA2：比較器", next: "q8_help", log: "Q8錯: 電容在回授端是積分，不是微分" },
+                    { text: "D. 兩者皆為反相放大器", next: "q8_help", log: "Q8錯: 無法產生震盪" }
                 ]
             },
             "q8_help": {
-                tag: "💊 救援任務：嚴格的 AND",
-                text: "「&&」代表邏輯 AND (而且)。它的個性很嚴格，必須「左邊對，而且右邊也對」，結果才會是 True。現在右邊 (2 < 1) 是錯的，所以總結果是？",
+                tag: "💊 救援任務：分工合作",
+                text: "第一級 OPA1 接在正端(+)是產生「方波」的施密特觸發器。第二級 OPA2 的電容 C 接在輸出與反相端(-)之間，這是一個能把方波變成三角波的什麼器？",
                 options: [
-                    { text: "A. False (假)", next: "q8", isCorrect: true },
-                    { text: "B. True (真)", next: "q8_help", log: "Q8救錯: 只要有一個錯，AND 就是錯的！" }
+                    { text: "A. 積分器", next: "q8", isCorrect: true },
+                    { text: "B. 微分器", next: "q8_help", log: "Q8救錯: 微分器的電容是接在輸入端喔" }
                 ]
             },
 
-            // --- 第 9 關：if 條件 ---
+            // --- 第 9 關：三角波觀測點 ---
             "q9": {
-                tag: "第 9 關：條件控制",
-                text: "執行以下程式碼：`if (0) { a=1; } else { a=2; }`，最後 a 的值為何？",
+                tag: "第 9 關：波形量測",
+                text: "承上題的三角波產生器，如果我們要用示波器量測完美的「三角波」，探棒應該接在哪一個端點？",
                 options: [
-                    { text: "A. 2", next: "q10", isCorrect: true },
-                    { text: "B. 1", next: "q9_help", log: "Q9錯: 括號內為 0，代表條件不成立" },
-                    { text: "C. 0", next: "q9_help", log: "Q9錯: a 被指定為 2 了" },
-                    { text: "D. 程式報錯", next: "q9_help", log: "Q9錯: 數字可以直接當作條件" }
+                    { text: "A. vo 端點 (OPA2 的輸出)", next: "q10", isCorrect: true },
+                    { text: "B. vo1 端點 (OPA1 的輸出)", next: "q9_help", log: "Q9錯: OPA1 輸出的是方波" },
+                    { text: "C. OPA1 的反相輸入端", next: "q9_help", log: "Q9錯: 這裡接地，是 0V" },
+                    { text: "D. OPA2 的反相輸入端", next: "q9_help", log: "Q9錯: 這裡是虛接地，電壓趨近於零" }
                 ]
             },
             "q9_help": {
-                tag: "💊 救援任務：真假數字",
-                text: "在 C/C++ 的世界裡，「0 代表 False(假)，任何非 0 的數字都代表 True(真)」。既然括號裡是 0，代表條件不成立，會執行 else 區塊。所以 a 等於？",
+                tag: "💊 救援任務：誰負責畫三角",
+                text: "方波(vo1)經過第二級的「積分器(OPA2)」後，才會被積分成平滑上升與下降的三角波。所以三角波會出現在哪裡？",
                 options: [
-                    { text: "A. 2", next: "q9", isCorrect: true },
-                    { text: "B. 1", next: "q9_help", log: "Q9救錯: 0 是 False，進不去 if 裡面喔" }
+                    { text: "A. 積分器 OPA2 的輸出 (vo)", next: "q9", isCorrect: true },
+                    { text: "B. 觸發器 OPA1 的輸出 (vo1)", next: "q9_help", log: "Q9救錯: 這裡是還沒處理過的方波！" }
                 ]
             },
 
-            // --- 第 10 關：switch 敘述 ---
+            // 🎸 第 10 關：娛樂穿插 (五月天 1)
             "q10": {
-                tag: "第 10 關：多重選擇",
-                text: "在 `switch` 敘述中，用來「跳出」當前 switch 區塊，防止繼續往下執行的關鍵字是？",
+                tag: "🎸 第 10 關：五迷簽到",
+                text: "大腦休息一下！台灣天團「五月天」中，身兼演唱會的發言擔當，並負責彈奏「貝斯 (Bass)」的團員是？",
                 options: [
-                    { text: "A. break", next: "q11", isCorrect: true },
-                    { text: "B. continue", next: "q10_help", log: "Q10錯: 這是用在迴圈跳過本回合的" },
-                    { text: "C. exit", next: "q10_help", log: "Q10錯: 這是直接關閉整個程式" },
-                    { text: "D. return", next: "q10_help", log: "Q10錯: 這是跳出整個函式" }
+                    { text: "A. 瑪莎", next: "q11", isCorrect: true },
+                    { text: "B. 阿信", next: "q10_help", log: "Q10錯: 他是主唱" },
+                    { text: "C. 怪獸", next: "q10_help", log: "Q10錯: 他是吉他手兼團長" },
+                    { text: "D. 冠佑", next: "q10_help", log: "Q10錯: 他是打鼓的" }
                 ]
             },
             "q10_help": {
-                tag: "💊 救援任務：煞車系統",
-                text: "switch 結構如果沒有加「煞車」，它會一路往下把所有的 case 都執行一遍 (稱為 fall-through)。用來煞車跳出的字是？",
+                tag: "💊 提示：長髮飄逸",
+                text: "他以前留著長髮，講話非常犀利幽默，最愛跟阿信在台上鬥嘴。這位貝斯手叫做？",
                 options: [
-                    { text: "A. break (打破/中斷)", next: "q10", isCorrect: true },
-                    { text: "B. continue (繼續)", next: "q10_help", log: "Q10救錯: continue 不能用在 switch 裡" }
+                    { text: "A. 瑪莎", next: "q10", isCorrect: true },
+                    { text: "B. 石頭", next: "q10_help", log: "Q10救錯: 石頭是吉他手啦" }
                 ]
             },
 
-            // --- 第 11 關：for 迴圈 ---
+            // --- 第 11 關：低通濾波器識別 ---
             "q11": {
-                tag: "第 11 關：基本迴圈",
-                text: "迴圈 `for(int i = 0; i < 3; i++)` 裡面的主體程式，總共會被執行幾次？",
+                tag: "第 11 關：主動濾波器",
+                text: "觀察下圖，這是一個基本的主動濾波器。由 RC 網路與非反相放大器組成。請問這是什麼濾波器？<br><br><img src='lp.png' style='width:100%; max-width:250px; border-radius:8px;'>",
                 options: [
-                    { text: "A. 3 次", next: "q12", isCorrect: true },
-                    { text: "B. 2 次", next: "q11_help", log: "Q11錯: 忘記算 i=0 的那一次了" },
-                    { text: "C. 4 次", next: "q11_help", log: "Q11錯: 當 i=3 時條件不成立，不會進去" },
-                    { text: "D. 無限次", next: "q11_help", log: "Q11錯: i 每次都會加 1，一定會停" }
+                    { text: "A. 低通濾波器 (Low-Pass Filter)", next: "q12", isCorrect: true },
+                    { text: "B. 高通濾波器 (High-Pass Filter)", next: "q11_help", log: "Q11錯: 高通的電容會接在信號串聯路徑上" },
+                    { text: "C. 帶通濾波器", next: "q11_help", log: "Q11錯: 帶通需要至少兩個電容" },
+                    { text: "D. 帶拒濾波器", next: "q11_help", log: "Q11錯: 帶拒電路更複雜" }
                 ]
             },
             "q11_help": {
-                tag: "💊 救援任務：手指數一數",
-                text: "我們跟著電腦算一次：i=0(進去執行第1次) -> i=1(執行第2次) -> i=2(執行第3次) -> i=3(發現不小於3，直接離開)。總共幾次？",
+                tag: "💊 救援任務：電容的特性",
+                text: "電容(C)對高頻訊號形同「短路」。圖中的 C 接到地上，代表高頻率的訊號過來時，會被電容直接「拉去接地」吃掉。高頻過不去，只有低頻過得去，這叫做？",
                 options: [
-                    { text: "A. 3 次", next: "q11", isCorrect: true },
-                    { text: "B. 4 次", next: "q11_help", log: "Q11救錯: i=3 的時候不會執行喔" }
+                    { text: "A. 低通濾波器", next: "q11", isCorrect: true },
+                    { text: "B. 高通濾波器", next: "q11_help", log: "Q11救錯: 高頻都被接地了，怎麼可能高通！" }
                 ]
             },
 
-            // --- 第 12 關：while 迴圈 ---
+            // --- 第 12 關：濾波器增益 ---
             "q12": {
-                tag: "第 12 關：條件迴圈",
-                text: "`while` 迴圈與 `do-while` 迴圈最大的差異是什麼？",
+                tag: "第 12 關：增益計算",
+                text: "承上題圖中的低通濾波器，在低頻通帶(Passband)時，其電壓增益 (Vo / Vi) 公式為何？",
                 options: [
-                    { text: "A. do-while 無論條件為何，至少會執行 1 次", next: "q13", isCorrect: true },
-                    { text: "B. while 至少會執行 1 次", next: "q12_help", log: "Q12錯: while 如果一開始條件不符，0 次就結束了" },
-                    { text: "C. do-while 只能用遞減計數", next: "q12_help", log: "Q12錯: 沒有這種限制" },
-                    { text: "D. 沒有差別，只是寫法不同", next: "q12_help", log: "Q12錯: 執行順序大不同" }
+                    { text: "A. 1 + (R1 / R2)", next: "q13", isCorrect: true },
+                    { text: "B. - R1 / R2", next: "q12_help", log: "Q12錯: 這是反相放大器的增益" },
+                    { text: "C. R2 / R1", next: "q12_help", log: "Q12錯: 顛倒了" },
+                    { text: "D. 1", next: "q12_help", log: "Q12錯: 這是電壓隨耦器" }
                 ]
             },
             "q12_help": {
-                tag: "💊 救援任務：先斬後奏",
-                text: "do 就是「做」的意思。`do-while` 的精神是「先做再說，做完再來檢查條件」。所以它保底一定會執行幾次？",
+                tag: "💊 救援任務：非反相放大",
+                text: "訊號 Vi 是從 OPA 的「正端(+)」進入的，這是一個標準的「非反相放大器」。非反相放大器的增益公式永遠是「1 + (回授電阻/接地電阻)」。",
                 options: [
-                    { text: "A. 至少執行 1 次", next: "q12", isCorrect: true },
-                    { text: "B. 可能 0 次", next: "q12_help", log: "Q12救錯: 這是普通的 while 迴圈" }
+                    { text: "A. 1 + (R1 / R2)", next: "q12", isCorrect: true },
+                    { text: "B. - R1 / R2", next: "q12_help", log: "Q12救錯: 負號是反相放大器才有的" }
                 ]
             },
 
-            // --- 第 13 關：巢狀迴圈 ---
+            // --- 第 13 關：高通濾波器識別 ---
             "q13": {
-                tag: "第 13 關：巢狀迴圈",
-                text: "外層迴圈執行 3 次，內層迴圈執行 4 次。請問內層迴圈的主體總共會被執行幾次？",
+                tag: "第 13 關：主動濾波器",
+                text: "觀察下圖，將輸入端的 R 與 C 位置對調後，這變成了什麼濾波器？<br><br><img src='hp.png' style='width:100%; max-width:250px; border-radius:8px;'>",
                 options: [
-                    { text: "A. 12 次", next: "q14", isCorrect: true },
-                    { text: "B. 7 次", next: "q13_help", log: "Q13錯: 不是相加，是相乘" },
-                    { text: "C. 3 次", next: "q13_help", log: "Q13錯: 算少了" },
-                    { text: "D. 4 次", next: "q13_help", log: "Q13錯: 算少了" }
+                    { text: "A. 高通濾波器 (High-Pass Filter)", next: "q14", isCorrect: true },
+                    { text: "B. 低通濾波器 (Low-Pass Filter)", next: "q13_help", log: "Q13錯: 低通的電容會接地" },
+                    { text: "C. 全通濾波器", next: "q13_help", log: "Q13錯: 沒有這種基本接法" },
+                    { text: "D. 帶通濾波器", next: "q13_help", log: "Q13錯: 帶通需要高低通組合" }
                 ]
             },
             "q13_help": {
-                tag: "💊 救援任務：乘法原理",
-                text: "外層就像是「有 3 個班級」，內層像是「每個班級有 4 個學生」。要算出總學生數，要把 3 和 4 拿來做什麼運算？",
+                tag: "💊 救援任務：電容擋路",
+                text: "電容(C)串聯在訊號輸入的路徑上。直流電(頻率0)遇到電容會被「斷路」擋下來；高頻訊號則覺得電容像短路一樣暢通無阻。高頻過得去，叫做？",
                 options: [
-                    { text: "A. 3 乘以 4 = 12 次", next: "q13", isCorrect: true },
-                    { text: "B. 3 加上 4 = 7 次", next: "q13_help", log: "Q13救錯: 巢狀迴圈是倍數關係！" }
+                    { text: "A. 高通濾波器", next: "q13", isCorrect: true },
+                    { text: "B. 低通濾波器", next: "q13_help", log: "Q13救錯: 低頻都被電容擋死了喔" }
                 ]
             },
 
-            // --- 第 14 關：continue ---
+            // --- 第 14 關：截止頻率公式 ---
             "q14": {
-                tag: "第 14 關：流程控制",
-                text: "在迴圈中，遇到哪一個指令會「跳過本回合剩下的程式碼，直接進入迴圈的下一次迭代」？",
+                tag: "第 14 關：截止頻率",
+                text: "無論是一階高通還是低通濾波器，決定「截止頻率 (fc)」的 RC 網路公式皆為下列何者？",
                 options: [
-                    { text: "A. continue", next: "q15", isCorrect: true },
-                    { text: "B. break", next: "q14_help", log: "Q14錯: break 是把整個迴圈直接摧毀結束" },
-                    { text: "C. return", next: "q14_help", log: "Q14錯: 這是結束整個函式" },
-                    { text: "D. goto", next: "q14_help", log: "Q14錯: 雖然可跳躍，但不是專屬這個功能的指令" }
+                    { text: "A. fc = 1 / (2πRC)", next: "q15", isCorrect: true },
+                    { text: "B. fc = 1 / (RC)", next: "q14_help", log: "Q14錯: 漏掉 2π" },
+                    { text: "C. fc = 2πRC", next: "q14_help", log: "Q14錯: 公式顛倒了" },
+                    { text: "D. fc = R / C", next: "q14_help", log: "Q14錯: 單位完全不對" }
                 ]
             },
             "q14_help": {
-                tag: "💊 救援任務：繼續下一局",
-                text: "break 像是「不玩了直接回家」，而這個單字的意思是「繼續」，它只會放棄這一局剩下的動作，然後「繼續」玩下一局。是哪個英文？",
+                tag: "💊 救援任務：頻率基本公式",
+                text: "頻率的單位是赫茲(Hz)，在交流電的世界裡，要把角頻率(ω = 1/RC)換算成一般頻率 f，必須除以一圈的弧度「2π」。所以分母要有 2πRC！",
                 options: [
-                    { text: "A. continue", next: "q14", isCorrect: true },
-                    { text: "B. break", next: "q14_help", log: "Q14救錯: break 就直接跳出去了喔" }
+                    { text: "A. 1 / (2πRC)", next: "q14", isCorrect: true },
+                    { text: "B. 2πRC", next: "q14_help", log: "Q14救錯: RC 必須在分母才對" }
                 ]
             },
 
-            // --- 第 15 關：陣列索引 ---
+            // 🏀 第 15 關：娛樂穿插 (NBA)
             "q15": {
-                tag: "第 15 關：陣列基礎",
-                text: "宣告一個陣列 `int arr[5];`，請問這個陣列的「最後一個」元素的索引值(Index)是多少？",
+                tag: "🏀 第 15 關：大腦休息 (體育)",
+                text: "換個心情！NBA 金州勇士隊的當家球星 Stephen Curry，徹底改變了現代籃球的打法，他最著名的籃球絕技是什麼？",
                 options: [
-                    { text: "A. 4", next: "q16", isCorrect: true },
-                    { text: "B. 5", next: "q15_help", log: "Q15錯: 陣列會越界 (Out of bounds)" },
-                    { text: "C. 1", next: "q15_help", log: "Q15錯: 這是第二個元素" },
-                    { text: "D. 0", next: "q15_help", log: "Q15錯: 這是第一個元素" }
+                    { text: "A. 超大號三分球", next: "q16", isCorrect: true },
+                    { text: "B. 罰球線起跳灌籃", next: "q15_help", log: "Q15錯: 這是 Michael Jordan 或 Zach LaVine 的絕技" },
+                    { text: "C. 歐洲步上籃", next: "q15_help", log: "Q15錯: 這是 Manu Ginóbili 的招牌" },
+                    { text: "D. 禁區天勾", next: "q15_help", log: "Q15錯: 這是 Kareem Abdul-Jabbar 的絕招" }
                 ]
             },
             "q15_help": {
-                tag: "💊 救援任務：從零開始",
-                text: "程式語言的陣列編號都是「從 0 開始」的！大小為 5 的陣列，編號會是 0, 1, 2, 3, 4。所以最後一個編號是？",
+                tag: "💊 提示：三分神射手",
+                text: "Curry 是 NBA 歷史上投進最多三分球的紀錄保持人，他最擅長的就是從很遠的地方投籃。也就是？",
                 options: [
-                    { text: "A. 4", next: "q15", isCorrect: true },
-                    { text: "B. 5", next: "q15_help", log: "Q15救錯: 寫 5 的話程式會當機喔" }
+                    { text: "A. 超大號三分球", next: "q15", isCorrect: true },
+                    { text: "B. 禁區天勾", next: "q15_help", log: "Q15救錯: 他身材在 NBA 算嬌小，不會一直打禁區啦！" }
                 ]
             },
 
-            // --- 第 16 關：陣列初始化 ---
+            // --- 第 16 關：帶通濾波器識別 ---
             "q16": {
-                tag: "第 16 關：陣列初始",
-                text: "執行宣告 `int a[3] = {1};` 後，請問 `a[1]` 和 `a[2]` 的內容會是什麼？",
+                tag: "第 16 關：組合濾波器",
+                text: "觀察下圖，這是一個利用兩級 OPA 串聯構成的電路。請問這是什麼濾波器？<br><br><img src='bp.png' style='width:100%; max-width:350px; border-radius:8px;'>",
                 options: [
-                    { text: "A. 皆為 0", next: "q17", isCorrect: true },
-                    { text: "B. 皆為 1", next: "q16_help", log: "Q16錯: 只有 a[0] 是 1" },
-                    { text: "C. 垃圾值", next: "q16_help", log: "Q16錯: 有大括號初始化，剩下的會自動補零" },
-                    { text: "D. 程式會編譯錯誤", next: "q16_help", log: "Q16錯: 這是合法的語法" }
+                    { text: "A. 帶通濾波器 (Band-Pass Filter)", next: "q17", isCorrect: true },
+                    { text: "B. 帶拒濾波器 (Band-Reject Filter)", next: "q16_help", log: "Q16錯: 帶拒通常需要用並聯相加的方式" },
+                    { text: "C. 純高通濾波器", next: "q16_help", log: "Q16錯: 右邊還有一級低通喔" },
+                    { text: "D. 純低通濾波器", next: "q16_help", log: "Q16錯: 左邊有一級高通喔" }
                 ]
             },
             "q16_help": {
-                tag: "💊 救援任務：自動補零",
-                text: "當我們用大括號 `{}` 給陣列初始值時，如果有沒填滿的空位，編譯器會非常貼心地幫你全部塞滿「0」。",
+                tag: "💊 救援任務：串聯的奧秘",
+                text: "左邊第一級是串聯電容 (高通)，右邊第二級是接地電容 (低通)。把「高通」跟「低通」串聯在一起，就像設了上下限，只讓中間的頻段通過。這叫做？",
                 options: [
-                    { text: "A. 皆為 0", next: "q16", isCorrect: true },
-                    { text: "B. 垃圾值", next: "q16_help", log: "Q16救錯: 電腦有幫你清空成 0 啦" }
+                    { text: "A. 帶通濾波器", next: "q16", isCorrect: true },
+                    { text: "B. 帶拒濾波器", next: "q16_help", log: "Q16救錯: 帶通才是只讓中間通過喔" }
                 ]
             },
 
-            // --- 第 17 關：字串結尾 ---
+            // --- 第 17 關：帶通濾波器條件 ---
             "q17": {
-                tag: "第 17 關：字串陣列",
-                text: "在 C/C++ 中，字元陣列若要被視為「字串 (String)」，其結尾必須包含哪一個特殊字元？",
+                tag: "第 17 關：帶通條件",
+                text: "承上題，要讓這兩級串聯電路成功發揮「帶通(Band-Pass)」的功能，高通的截止頻率 (fL) 與低通的截止頻率 (fH) 必須滿足什麼條件？",
                 options: [
-                    { text: "A. '\\0' (Null字元)", next: "q18", isCorrect: true },
-                    { text: "B. '\\n' (換行字元)", next: "q17_help", log: "Q17錯: 這是用來斷行的" },
-                    { text: "C. ' ' (空白字元)", next: "q17_help", log: "Q17錯: 空白只是一般字元" },
-                    { text: "D. 'EOF'", next: "q17_help", log: "Q17錯: 這是檔案結束符號" }
+                    { text: "A. fH 必須大於 fL (fH > fL)", next: "q18", isCorrect: true },
+                    { text: "B. fL 必須大於 fH (fL > fH)", next: "q17_help", log: "Q17錯: 這樣頻帶會交錯，甚麼訊號都過不去" },
+                    { text: "C. 兩者必須相等", next: "q17_help", log: "Q17錯: 這樣頻寬為0" },
+                    { text: "D. 毫無限制", next: "q17_help", log: "Q17錯: 條件錯了就無法帶通" }
                 ]
             },
             "q17_help": {
-                tag: "💊 救援任務：字串的煞車",
-                text: "電腦必須知道字串在哪裡結束，否則會印出一堆亂碼。我們必須在結尾放一個代表「空(Null)」的特殊字元 `\\0` 來當煞車。",
+                tag: "💊 救援任務：邏輯交集",
+                text: "高通負責擋掉低音(放行 fL 以上)，低通負責擋掉高音(放行 fH 以下)。要讓中間有路可走，上限(fH)當然要大於下限(fL)！就像年齡限制 18歲(fL) 到 65歲(fH) 一樣。",
                 options: [
-                    { text: "A. '\\0'", next: "q17", isCorrect: true },
-                    { text: "B. '\\n'", next: "q17_help", log: "Q17救錯: \\n 是換行(Enter)鍵的作用" }
+                    { text: "A. fH 大於 fL", next: "q17", isCorrect: true },
+                    { text: "B. fL 大於 fH", next: "q17_help", log: "Q17救錯: 這樣就沒人能通過了" }
                 ]
             },
 
-            // --- 第 18 關：無回傳值函式 ---
+            // --- 第 18 關：帶拒濾波器識別 ---
             "q18": {
-                tag: "第 18 關：函式宣告",
-                text: "當自訂函式執行完畢後「不需要回傳任何結果」給主程式時，函式的回傳型態應宣告為？",
+                tag: "第 18 關：組合濾波器",
+                text: "觀察下圖，輸入訊號分成上下兩路（一路高通、一路低通），最後再用加法器結合。這是什麼濾波器？<br><br><img src='br.png' style='width:100%; max-width:350px; border-radius:8px;'>",
                 options: [
-                    { text: "A. void", next: "q19", isCorrect: true },
-                    { text: "B. int", next: "q18_help", log: "Q18錯: int 代表必須回傳一個整數" },
-                    { text: "C. null", next: "q18_help", log: "Q18錯: null 通常用於指標，不是型態" },
-                    { text: "D. empty", next: "q18_help", log: "Q18錯: C語言沒有這個關鍵字" }
+                    { text: "A. 帶拒濾波器 (Band-Reject Filter)", next: "q19", isCorrect: true },
+                    { text: "B. 帶通濾波器", next: "q18_help", log: "Q18錯: 帶通是串聯" },
+                    { text: "C. 全通濾波器", next: "q18_help", log: "Q18錯: 頻率響應不同" },
+                    { text: "D. 儀表放大器", next: "q18_help", log: "Q18錯: 儀表放大器不含濾波電容" }
                 ]
             },
             "q18_help": {
-                tag: "💊 救援任務：空無一物",
-                text: "在程式界，代表「空、無」的英文單字，常常出現在函式前面。這個字叫做 void！",
+                tag: "💊 救援任務：分進合擊",
+                text: "訊號兵分兩路：低音走下面(低通)通過，高音走上面(高通)通過。最後加起來，代表「低音和高音都過了，只有中間的被拒絕」。這叫做？",
                 options: [
-                    { text: "A. void", next: "q18", isCorrect: true },
-                    { text: "B. int", next: "q18_help", log: "Q18救錯: int 代表一定要 return 數字喔" }
+                    { text: "A. 帶拒濾波器", next: "q18", isCorrect: true },
+                    { text: "B. 帶通濾波器", next: "q18_help", log: "Q18救錯: 帶通是只讓中間過喔！" }
                 ]
             },
 
-            // --- 第 19 關：陣列傳遞 ---
+            // --- 第 19 關：陷波濾波器 ---
             "q19": {
-                tag: "第 19 關：參數傳遞",
-                text: "將「一維陣列」當作參數傳遞給函式時，實際上傳遞給函式的是什麼東西？",
+                tag: "第 19 關：帶拒應用",
+                text: "當「帶拒濾波器」的阻擋頻帶被設計得「非常窄」（Q值極高），專門用來消除特定單一頻率（例如 60Hz 電源雜訊）時，又被稱為什麼？",
                 options: [
-                    { text: "A. 陣列第一個元素的記憶體位址 (Call by address)", next: "q20", isCorrect: true },
-                    { text: "B. 整個陣列所有元素的備份 (Call by value)", next: "q19_help", log: "Q19錯: 這樣太耗費記憶體了" },
-                    { text: "C. 陣列的長度大小", next: "q19_help", log: "Q19錯: 長度通常要另外傳一個參數" },
-                    { text: "D. 陣列最後一個元素的值", next: "q19_help", log: "Q19錯: 完全無意義" }
+                    { text: "A. 陷波濾波器 (Notch Filter)", next: "q20", isCorrect: true },
+                    { text: "B. 峰波濾波器 (Peak Filter)", next: "q19_help", log: "Q19錯: 這是窄頻帶通" },
+                    { text: "C. 梳狀濾波器", next: "q19_help", log: "Q19錯: 梳狀會有很多個阻擋點" },
+                    { text: "D. 漣波濾波器", next: "q19_help", log: "Q19錯: 沒有這個專有名詞" }
                 ]
             },
             "q19_help": {
-                tag: "💊 救援任務：傳遞門牌號碼",
-                text: "陣列可能有一萬筆資料，拷貝一份給函式太浪費時間了。所以我們只給函式「第一筆資料的門牌號碼(位址)」，讓函式自己去找。",
+                tag: "💊 救援任務：挖一個洞",
+                text: "專門針對特定頻率「挖一個深深的陷阱」把它消除掉的濾波器，英文叫 Notch，中文就叫做「陷波」濾波器！",
                 options: [
-                    { text: "A. 第一個元素的記憶體位址", next: "q19", isCorrect: true },
-                    { text: "B. 整個陣列的拷貝", next: "q19_help", log: "Q19救錯: 拷貝整個陣列會讓電腦效能變極差" }
+                    { text: "A. 陷波濾波器", next: "q19", isCorrect: true },
+                    { text: "B. 峰波濾波器", next: "q19_help", log: "Q19救錯: 峰波是凸起來的，陷波是凹下去的" }
                 ]
             },
 
-            // --- 第 20 關：變數作用域 ---
+            // 🗡️ 第 20 關：娛樂穿插 (進擊的巨人)
             "q20": {
-                tag: "第 20 關：變數範圍",
-                text: "在函式 (Function)「內部」宣告的變數，其生命週期只活在這個函式裡。這稱為什麼變數？",
+                tag: "🗡️ 第 20 關：大腦休息 (動漫)",
+                text: "動漫時間！在神作動漫《進擊的巨人》中，主角艾連·葉卡為了驅逐世上所有的巨人，他選擇加入了哪一個軍團？",
                 options: [
-                    { text: "A. 區域變數 (Local variable)", next: "q21", isCorrect: true },
-                    { text: "B. 全域變數 (Global variable)", next: "q20_help", log: "Q20錯: 宣告在所有函式外部的才是全域" },
-                    { text: "C. 靜態變數 (Static variable)", next: "q20_help", log: "Q20錯: 靜態變數的生命週期會延續到程式結束" },
-                    { text: "D. 外部變數 (Extern variable)", next: "q20_help", log: "Q20錯: 這是用來引用別的檔案的變數" }
+                    { text: "A. 調查兵團", next: "q21", isCorrect: true },
+                    { text: "B. 駐紮兵團", next: "q20_help", log: "Q20錯: 他們負責守護牆壁" },
+                    { text: "C. 憲兵團", next: "q20_help", log: "Q20錯: 他們在內地保護國王" },
+                    { text: "D. 訓練兵團", next: "q20_help", log: "Q20錯: 這是新兵待的地方" }
                 ]
             },
             "q20_help": {
-                tag: "💊 救援任務：特定範圍",
-                text: "只能在「特定區域 (大括號裡面)」使用的變數，一旦離開這個括號就會被消滅。所以它叫做什麼變數？",
+                tag: "💊 提示：自由之翼",
+                text: "這個軍團的徽章是「自由之翼」，他們總是冒著生命危險離開牆外，去探索外面的世界與對抗巨人。叫做什麼兵團？",
                 options: [
-                    { text: "A. 區域變數 (Local)", next: "q20", isCorrect: true },
-                    { text: "B. 全域變數 (Global)", next: "q20_help", log: "Q20救錯: 全域是大家都能共用的" }
+                    { text: "A. 調查兵團", next: "q20", isCorrect: true },
+                    { text: "B. 憲兵團", next: "q20_help", log: "Q20救錯: 憲兵團都躲在最裡面啦！" }
                 ]
             },
 
-            // --- 第 21 關：全域變數預設值 ---
+            // --- 第 21 關：主動與被動濾波器差異 ---
             "q21": {
-                tag: "第 21 關：全域變數",
-                text: "在程式最上方宣告的「全域變數 (Global variable)」，如果沒有給予初始值，編譯器預設會給它什麼值？",
+                tag: "第 21 關：濾波器比較",
+                text: "主動濾波器（使用 OPA）比起傳統的被動濾波器（僅使用 R、L、C），最大的優點是「不需使用電感器」，且還具備什麼特性？",
                 options: [
-                    { text: "A. 0", next: "q22", isCorrect: true },
-                    { text: "B. 垃圾值 (Garbage value)", next: "q21_help", log: "Q21錯: 這是區域變數的特性" },
-                    { text: "C. -1", next: "q21_help", log: "Q21錯: 不會給 -1" },
-                    { text: "D. 編譯錯誤", next: "q21_help", log: "Q21錯: 語法是合法的" }
+                    { text: "A. 能提供電壓增益 (訊號放大)", next: "q22", isCorrect: true },
+                    { text: "B. 消耗功率為零", next: "q21_help", log: "Q21錯: OPA 需要插電，有功率消耗" },
+                    { text: "C. 可以操作在極高頻 (數GHz)", next: "q21_help", log: "Q21錯: OPA 有頻寬限制，高頻反而不適用" },
+                    { text: "D. 不需要電源供應", next: "q21_help", log: "Q21錯: 主動元件一定要吃電" }
                 ]
             },
             "q21_help": {
-                tag: "💊 救援任務：全域的禮遇",
-                text: "跟區域變數充滿垃圾值不同，全域變數享有 VIP 待遇，系統在程式一開始就會自動幫它「清空歸零」。",
+                tag: "💊 救援任務：OPA的優勢",
+                text: "被動元件(電阻電容)只會消耗能量，訊號越濾越小。但加上了運算「放大」器(OPA)後，除了濾波，它還能幫你把微弱的訊號做什麼？",
                 options: [
-                    { text: "A. 0", next: "q21", isCorrect: true },
-                    { text: "B. 垃圾值", next: "q21_help", log: "Q21救錯: 區域變數才是垃圾值" }
+                    { text: "A. 訊號放大 (提供增益)", next: "q21", isCorrect: true },
+                    { text: "B. 吸收輻射", next: "q21_help", log: "Q21救錯: OPA 沒有這種科幻功能" }
                 ]
             },
 
-            // --- 第 22 關：遞迴 ---
+            // --- 第 22 關：濾波器階數 ---
             "q22": {
-                tag: "第 22 關：進階函式",
-                text: "一個函式在執行的過程中，又「呼叫自己本身」，這種程式設計技巧稱為什麼？",
+                tag: "第 22 關：濾波特性",
+                text: "濾波器的「階數 (Order)」決定了它在截止頻率之後，衰減滾降的陡峭程度。一階濾波器的衰減率為何？",
                 options: [
-                    { text: "A. 遞迴 (Recursion)", next: "q23", isCorrect: true },
-                    { text: "B. 迭代 (Iteration)", next: "q22_help", log: "Q22錯: 這是指使用 for 或 while 迴圈" },
-                    { text: "C. 多載 (Overloading)", next: "q22_help", log: "Q22錯: 這是指同名但參數不同的函式" },
-                    { text: "D. 覆寫 (Overriding)", next: "q22_help", log: "Q22錯: 這是物件導向中子類別改寫父類別" }
+                    { text: "A. -20 dB / decade", next: "q23", isCorrect: true },
+                    { text: "B. -40 dB / decade", next: "q22_help", log: "Q22錯: 這是二階濾波器的衰減率" },
+                    { text: "C. -60 dB / decade", next: "q22_help", log: "Q22錯: 這是三階濾波器的衰減率" },
+                    { text: "D. -3 dB / decade", next: "q22_help", log: "Q22錯: -3dB 是截止點的下降量" }
                 ]
             },
             "q22_help": {
-                tag: "💊 救援任務：俄羅斯娃娃",
-                text: "就像俄羅斯娃娃一樣，打開裡面還有一個自己；函式呼叫自己，在資電類統測中，這招叫做「遞迴」。",
+                tag: "💊 救援任務：階數與衰減",
+                text: "每增加一個階數(多一個 RC 網路)，每十倍頻(decade)的衰減量就會多掉 20 dB。所以「一階」就是最基本的多少？",
                 options: [
-                    { text: "A. 遞迴 (Recursion)", next: "q22", isCorrect: true },
-                    { text: "B. 迭代 (Iteration)", next: "q22_help", log: "Q22救錯: 迭代是寫迴圈的意思" }
+                    { text: "A. -20 dB / decade", next: "q22", isCorrect: true },
+                    { text: "B. -40 dB / decade", next: "q22_help", log: "Q22救錯: 這是二階的數字喔" }
                 ]
             },
 
-            // --- 第 23 關：取址運算子 ---
+            // --- 第 23 關：555 內部結構 ---
             "q23": {
-                tag: "第 23 關：指標基礎",
-                text: "若宣告 `int a = 10;`，想取得變數 a 儲存在記憶體中的「位址(Address)」，要使用哪一個運算子？",
+                tag: "第 23 關：555 計時器",
+                text: "555 計時器 IC 內部，用來設定比較器參考電壓 (2/3 Vcc 與 1/3 Vcc) 的分壓電阻，是由三個阻值相同的電阻串聯而成。這個阻值是多少？",
                 options: [
-                    { text: "A. &", next: "q24", isCorrect: true },
-                    { text: "B. *", next: "q23_help", log: "Q23錯: 這是取值(解參照)運算子" },
-                    { text: "C. %", next: "q23_help", log: "Q23錯: 這是取餘數" },
-                    { text: "D. ->", next: "q23_help", log: "Q23錯: 這是結構指標存取成員用的" }
+                    { text: "A. 5 kΩ", next: "q24", isCorrect: true },
+                    { text: "B. 10 kΩ", next: "q23_help", log: "Q23錯: 阻值不對" },
+                    { text: "C. 555 Ω", next: "q23_help", log: "Q23錯: 這是迷思陷阱！" },
+                    { text: "D. 1 MΩ", next: "q23_help", log: "Q23錯: 阻值太大" }
                 ]
             },
             "q23_help": {
-                tag: "💊 救援任務：Address的符號",
-                text: "英文的 And 符號 `&`，在 C 語言的指標世界裡，叫做「取址運算子 (Address-of)」。星號 `*` 則是用來解開位址拿東西的。",
+                tag: "💊 救援任務：名字的由來",
+                text: "555 這個經典 IC 的命名由來，有一說就是因為它內部剛好用了「三個 5 千歐姆」的電阻來分壓。是幾 kΩ？",
                 options: [
-                    { text: "A. &", next: "q23", isCorrect: true },
-                    { text: "B. *", next: "q23_help", log: "Q23救錯: * 是用來宣告指標或取值的" }
+                    { text: "A. 5 kΩ", next: "q23", isCorrect: true },
+                    { text: "B. 555 Ω", next: "q23_help", log: "Q23救錯: 是三個 5k，不是 555 歐姆！" }
                 ]
             },
 
-            // --- 第 24 關：複合指派 ---
+            // --- 第 24 關：無穩態應用 ---
             "q24": {
-                tag: "第 24 關：簡寫語法",
-                text: "程式敘述 `x += 3;` 完全等價於下列哪一種寫法？",
+                tag: "第 24 關：電路應用",
+                text: "下列哪一種裝置或應用，最適合使用「555 無穩態多諧振盪器」來實現？",
                 options: [
-                    { text: "A. x = x + 3;", next: "q25", isCorrect: true },
-                    { text: "B. x = 3 + 3;", next: "q24_help", log: "Q24錯: 丟失了 x 原本的值" },
-                    { text: "C. x = x + 1;", next: "q24_help", log: "Q24錯: 這是 x++" },
-                    { text: "D. x = 3;", next: "q24_help", log: "Q24錯: 這是直接指派" }
+                    { text: "A. 汽車方向燈 (固定頻率閃爍)", next: "q25", isCorrect: true },
+                    { text: "B. 觸控式電梯按鈕", next: "q24_help", log: "Q24錯: 需要觸發，應該用單穩態" },
+                    { text: "C. 警報器延時關閉", next: "q24_help", log: "Q24錯: 延遲功能是單穩態" },
+                    { text: "D. 音響的低音加強", next: "q24_help", log: "Q24錯: 這是低通濾波器的工作" }
                 ]
             },
             "q24_help": {
-                tag: "💊 救援任務：加並指派",
-                text: "`+=` 的意思是：把右邊的數字，加上原本的自己，然後重新存回自己身上。也就是 `自己 = 自己 + 3`。",
+                tag: "💊 救援任務：持續跳動",
+                text: "無穩態電路的特色就是「通電後自己會一直規律地忽高忽低跳動」，不用人按。選項中哪個是一直規律閃爍的？",
                 options: [
-                    { text: "A. x = x + 3;", next: "q24", isCorrect: true },
-                    { text: "B. x = 3;", next: "q24_help", log: "Q24救錯: 這樣寫 x 原本的數字就不見了" }
+                    { text: "A. 汽車方向燈閃爍", next: "q24", isCorrect: true },
+                    { text: "B. 觸控按鈕", next: "q24_help", log: "Q24救錯: 按鈕要人碰，那是單穩態" }
                 ]
             },
 
-            // --- 第 25 關：強制轉型 ---
+            // 🎸 第 25 關：娛樂穿插 (五月天 2)
             "q25": {
-                tag: "第 25 關：型態轉換",
-                text: "執行強制型態轉換 `(int) 3.84`，得到的結果為何？",
+                tag: "🎸 第 25 關：五迷簽到",
+                text: "「加入五月天，永遠不會太遲！」這句感動無數粉絲，並成為五月天演唱會經典口號的名言，是出自哪一位團員之口？",
                 options: [
-                    { text: "A. 3", next: "q26", isCorrect: true },
-                    { text: "B. 4", next: "q25_help", log: "Q25錯: 轉成 int 不會四捨五入" },
-                    { text: "C. 3.8", next: "q25_help", log: "Q25錯: int 不能有小數點" },
-                    { text: "D. 0", next: "q25_help", log: "Q25錯: 值不會憑空消失" }
+                    { text: "A. 阿信", next: "q26", isCorrect: true },
+                    { text: "B. 怪獸", next: "q25_help", log: "Q25錯: 雖然是團長，但這句是主唱講的" },
+                    { text: "C. 石頭", next: "q25_help", log: "Q25錯: 這是阿信的經典語錄" },
+                    { text: "D. 冠佑", next: "q25_help", log: "Q25錯: 冠佑通常是負責被虧的" }
                 ]
             },
             "q25_help": {
-                tag: "💊 救援任務：無情捨去",
-                text: "把浮點數(小數)強制變成整數(int)時，電腦不會幫你四捨五入，而是直接拿刀把小數點後面全部「無情砍掉」。",
+                tag: "💊 提示：主唱大人",
+                text: "這句話通常是在演唱會的感性 Talking 橋段，由拿著麥克風、負責寫詞的主唱說出來的。請問他是？",
                 options: [
-                    { text: "A. 3", next: "q25", isCorrect: true },
-                    { text: "B. 4", next: "q25_help", log: "Q25救錯: 電腦沒有四捨五入這麼聰明" }
+                    { text: "A. 阿信", next: "q25", isCorrect: true },
+                    { text: "B. 瑪莎", next: "q25_help", log: "Q25救錯: 瑪莎的發言通常比較毒舌啦！" }
                 ]
             },
 
-            // --- 第 26 關：三元運算子 ---
+            // --- 第 26 關：方波轉三角波 ---
             "q26": {
-                tag: "第 26 關：條件簡寫",
-                text: "執行三元運算子 `int max = (10 > 5) ? 100 : 200;` 後，max 的值為何？",
+                tag: "第 26 關：波形轉換",
+                text: "如果我們已經有一個 555 產生的「方波」，想將它轉換成「三角波」，只需要通過下列哪一種 OPA 電路即可？",
                 options: [
-                    { text: "A. 100", next: "q27", isCorrect: true },
-                    { text: "B. 200", next: "q26_help", log: "Q26錯: 條件成立會選冒號左邊的" },
-                    { text: "C. 10", next: "q26_help", log: "Q26錯: 10只是條件" },
-                    { text: "D. 5", next: "q26_help", log: "Q26錯: 5只是條件" }
+                    { text: "A. 積分器", next: "q27", isCorrect: true },
+                    { text: "B. 微分器", next: "q26_help", log: "Q26錯: 方波過微分器會變成極窄的脈衝(針狀波)" },
+                    { text: "C. 電壓隨耦器", next: "q26_help", log: "Q26錯: 輸出的波形不變，還是方波" },
+                    { text: "D. 施密特觸發器", next: "q26_help", log: "Q26錯: 已經是方波了，觸發器只會讓它更方" }
                 ]
             },
             "q26_help": {
-                tag: "💊 救援任務：問號與冒號",
-                text: "語法是 `條件 ? 對的話選這個 : 錯的話選這個`。因為 10 大於 5 是對的(True)，所以會挑選冒號「左邊」的數字。",
+                tag: "💊 救援任務：面積的累積",
+                text: "方波是常數(平的)，在微積分中，常數經過「積分」後，會變成斜率固定的斜線(一次函數)，也就是三角波的形狀！",
                 options: [
-                    { text: "A. 100", next: "q26", isCorrect: true },
-                    { text: "B. 200", next: "q26_help", log: "Q26救錯: 條件是對的，不能選右邊" }
+                    { text: "A. 積分器", next: "q26", isCorrect: true },
+                    { text: "B. 微分器", next: "q26_help", log: "Q26救錯: 微分會抓瞬間變化，變成針狀脈衝喔" }
                 ]
             },
 
-            // --- 第 27 關：位元運算 ---
+            // --- 第 27 關：頻帶頻率關係 ---
             "q27": {
-                tag: "第 27 關：位元操作",
-                text: "執行位元及 (Bitwise AND) 運算：`5 & 3` 的十進制結果為何？(提示：5是101，3是011)",
+                tag: "第 27 關：濾波器特性",
+                text: "關於濾波器的截止頻率 (fc)，在頻率響應曲線上，代表此時的輸出功率下降到最大功率的多少？",
                 options: [
-                    { text: "A. 1", next: "q28", isCorrect: true },
-                    { text: "B. 7", next: "q27_help", log: "Q27錯: 這是位元 OR (|) 的結果" },
-                    { text: "C. 8", next: "q27_help", log: "Q27錯: 這不是普通的加法" },
-                    { text: "D. 6", next: "q27_help", log: "Q27錯: 這是位元 XOR (^) 的結果" }
+                    { text: "A. 1/2 (即 -3dB)", next: "q28", isCorrect: true },
+                    { text: "B. 1/4 (即 -6dB)", next: "q27_help", log: "Q27錯: 這是電流減半的功率點" },
+                    { text: "C. 1/10 (即 -10dB)", next: "q27_help", log: "Q27錯: 數值不對" },
+                    { text: "D. 完全衰減到 0", next: "q27_help", log: "Q27錯: 濾波器無法做到瞬間垂直衰減" }
                 ]
             },
             "q27_help": {
-                tag: "💊 救援任務：上下對齊 AND",
-                text: "101 和 011 上下對齊做 AND(兩個都是1才是1)。第一位1&0=0，第二位0&1=0，第三位1&1=1。得出二進制 001，也就是十進制的多少？",
+                tag: "💊 救援任務：半功率點",
+                text: "截止頻率又被稱為「半功率頻率」。因為此時輸出的電壓會掉到原來的 0.707 倍，平方後的功率剛好掉到「一半」，對應的分貝數就是 -3dB！",
                 options: [
-                    { text: "A. 1", next: "q27", isCorrect: true },
-                    { text: "B. 7", next: "q27_help", log: "Q27救錯: 這是 OR 才會變 111 (7)" }
+                    { text: "A. 1/2 (即 -3dB)", next: "q27", isCorrect: true },
+                    { text: "B. 1/4", next: "q27_help", log: "Q27救錯: 是剩下一半喔" }
                 ]
             },
 
-            // --- 第 28 關：結構體存取 ---
+            // --- 第 28 關：頻寬運算 ---
             "q28": {
-                tag: "第 28 關：自訂資料",
-                text: "宣告一個結構實體 `struct Student s1;`，要存取裡面的成員 `age`，正確寫法是？",
+                tag: "第 28 關：頻寬定義",
+                text: "一個帶通濾波器，測得其低頻截止頻率為 1 kHz，高頻截止頻率為 10 kHz，請問這個濾波器的「頻寬 (Bandwidth, BW)」是多少？",
                 options: [
-                    { text: "A. s1.age", next: "q29", isCorrect: true },
-                    { text: "B. s1->age", next: "q28_help", log: "Q28錯: 這是指標變數才用的箭頭" },
-                    { text: "C. s1(age)", next: "q28_help", log: "Q28錯: 括號是呼叫函式" },
-                    { text: "D. s1[age]", next: "q28_help", log: "Q28錯: 中括號是用在陣列" }
+                    { text: "A. 9 kHz", next: "q29", isCorrect: true },
+                    { text: "B. 11 kHz", next: "q28_help", log: "Q28錯: 不是相加，是相減" },
+                    { text: "C. 10 kHz", next: "q28_help", log: "Q28錯: 沒有減去下限" },
+                    { text: "D. 1 kHz", next: "q28_help", log: "Q28錯: 計算錯誤" }
                 ]
             },
             "q28_help": {
-                tag: "💊 救援任務：點還是箭頭",
-                text: "對於「普通的結構實體」，我們使用小數點「`.`」來存取成員。如果是「結構指標」，才要用箭頭「`->`」。",
+                tag: "💊 救援任務：算距離",
+                text: "頻寬(BW)就是「可以通過的頻率範圍有多寬」。只要把上限頻率減掉下限頻率即可： 10kHz - 1kHz = ?",
                 options: [
-                    { text: "A. s1.age", next: "q28", isCorrect: true },
-                    { text: "B. s1->age", next: "q28_help", log: "Q28救錯: 這裡沒有宣告指標喔！" }
+                    { text: "A. 9 kHz", next: "q28", isCorrect: true },
+                    { text: "B. 11 kHz", next: "q28_help", log: "Q28救錯: 是相減，不是相加啦" }
                 ]
             },
 
-            // --- 第 29 關：常數 ---
+            // --- 第 29 關：555 單穩態腳位 5 ---
             "q29": {
-                tag: "第 29 關：唯讀變數",
-                text: "想要宣告一個「只讀不寫 (不能被修改)」的常數變數 (例如圓周率)，應該加上哪一個關鍵字？",
+                tag: "第 29 關：555 內部細節",
+                text: "回顧第 1 關的 555 單穩態圖，IC 的第 5 腳 (控制電壓端) 通常會接一個 0.01μF 的小電容到地。這個電容的功用是什麼？",
                 options: [
-                    { text: "A. const", next: "q30", isCorrect: true },
-                    { text: "B. static", next: "q29_help", log: "Q29錯: static 只是讓變數活得比較久，還是能改" },
-                    { text: "C. void", next: "q29_help", log: "Q29錯: void 代表沒有型態" },
-                    { text: "D. unsigned", next: "q29_help", log: "Q29錯: 這是無號數(沒有負數)的意思" }
+                    { text: "A. 旁路掉高頻雜訊，穩定內部比較器的參考電壓", next: "q30", isCorrect: true },
+                    { text: "B. 決定輸出的脈波寬度", next: "q29_help", log: "Q29錯: 決定時間的是第 6, 7 腳接的外部 RC" },
+                    { text: "C. 提供 IC 電源", next: "q29_help", log: "Q29錯: 電源是第 8 腳" },
+                    { text: "D. 讓輸出訊號變平滑", next: "q29_help", log: "Q29錯: 第 5 腳不影響輸出端形狀" }
                 ]
             },
             "q29_help": {
-                tag: "💊 救援任務：Constant",
-                text: "常數的英文是 Constant。在程式中，我們取前 5 個字母作為保護變數不被修改的鎖。是哪個字？",
+                tag: "💊 救援任務：防雜訊濾波",
+                text: "第 5 腳直接連到內部 2/3 Vcc 的參考點。為了怕外界干擾讓這個標準電壓亂飄，接上小電容可以把「雜訊」吸到地裡面去。也就是為了？",
                 options: [
-                    { text: "A. const", next: "q29", isCorrect: true },
-                    { text: "B. static", next: "q29_help", log: "Q29救錯: static 是靜態的意思" }
+                    { text: "A. 濾除雜訊，穩定電壓", next: "q29", isCorrect: true },
+                    { text: "B. 決定脈波寬度", next: "q29_help", log: "Q29救錯: 這是第 6, 7 腳外接大電容的工作" }
                 ]
             },
 
-            // --- 第 30 關：運算子優先權 ---
+            // 🎸 第 30 關：最終魔王 (電子與五月天結合)
             "q30": {
-                tag: "第 30 關：最終魔王 (優先權)",
-                text: "根據 C/C++ 的運算子優先權規則，執行 `2 + 3 * 4` 會得到什麼結果？",
+                tag: "🏆 最終關：綜合應用",
+                text: "最後一題！假設五月天演唱會的音響工程師，想要把吉他發出的聲音中，那些刺耳的「高頻雜音」濾掉，只保留低沉渾厚的聲音。他應該在混音器加上我們今天學的哪一種電路？",
                 options: [
-                    { text: "A. 14", next: "end", isCorrect: true },
-                    { text: "B. 20", next: "q30_help", log: "Q30錯: 不能由左到右傻傻加" },
-                    { text: "C. 24", next: "q30_help", log: "Q30錯: 亂猜的" },
-                    { text: "D. 9", next: "q30_help", log: "Q30錯: 亂猜的" }
+                    { text: "A. 低通濾波器 (Low-Pass Filter)", next: "end", isCorrect: true },
+                    { text: "B. 高通濾波器 (High-Pass Filter)", next: "q30_help", log: "Q30錯: 這樣低音就不見了，只剩刺耳高音" },
+                    { text: "C. 無穩態多諧振盪器", next: "q30_help", log: "Q30錯: 這會讓喇叭發出固定的嗶嗶聲" },
+                    { text: "D. 施密特觸發器", next: "q30_help", log: "Q30錯: 音樂訊號會被破壞成方波(嚴重破音)" }
                 ]
             },
             "q30_help": {
-                tag: "💊 救援任務：先乘除後加減",
-                text: "程式跟數學一樣，遵守「先乘除，後加減」的鐵則！請先算 3 乘以 4，再加上 2。",
+                tag: "💊 救援任務：留誰就叫什麼通",
+                text: "濾波器的命名法則是「保留下來的頻段」。工程師想要「保留低音」、「砍掉高音」。讓低頻通過的電路叫做？",
                 options: [
-                    { text: "A. 14", next: "q30", isCorrect: true },
-                    { text: "B. 20", next: "q30_help", log: "Q30救錯: 這是先加 2+3=5，才乘 4，錯啦！" }
+                    { text: "A. 低通濾波器", next: "q30", isCorrect: true },
+                    { text: "B. 高通濾波器", next: "q30_help", log: "Q30救錯: 這樣就只聽得到高頻雜音啦！" }
                 ]
             }
         };
-
         // ==========================================
         // 系統變數與遊戲邏輯
         // ==========================================
