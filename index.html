@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>程式語言設計 - 抽卡特訓班 (30題連擊版)</title>
+    <title>抽卡特訓班 (電容與Q=CV隨機特訓)</title>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         body {
             font-family: '微軟正黑體', sans-serif; 
@@ -12,7 +23,6 @@
             align-items: center; height: 100vh; margin: 0; overflow: hidden;
             transition: background-color 0.5s ease; 
         }
-        
         body.rescue-mode { background-color: #4a1010; }
 
         .container {
@@ -27,20 +37,87 @@
         #game-area { display: none; }
         #result-area { display: none; }
 
+        .warning-box {
+            background-color: #c0392b; color: white; padding: 12px; 
+            border-radius: 8px; margin-bottom: 20px; font-weight: bold;
+            font-size: 15px; line-height: 1.4; border: 2px solid #e74c3c;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
         input[type="text"] {
             width: 80%; padding: 15px; font-size: 18px; border-radius: 8px; 
             border: 2px solid #3498db; background: #1a1a2e; color: white; 
             text-align: center; margin-bottom: 20px;
         }
-        
+
+        /* 🧮 右下角懸浮計算機樣式 */
+        #floating-calc-btn {
+            position: fixed; bottom: 20px; right: 20px; z-index: 999;
+            background: #e67e22; color: white; border: none; border-radius: 50px;
+            padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.6); transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        #floating-calc-btn:hover { background: #d35400; transform: scale(1.05); }
+
+        #calc-modal {
+            position: fixed; bottom: 80px; right: 20px; z-index: 1000;
+            background: #16213e; border: 2px solid #f39c12; border-radius: 12px;
+            width: 250px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            display: none; text-align: left;
+        }
+        .calc-header {
+            display: flex; justify-content: space-between; align-items: center;
+            color: #f39c12; font-weight: bold; font-size: 15px; margin-bottom: 10px;
+            border-bottom: 1px solid #2c3e50; padding-bottom: 5px;
+        }
+        .calc-close { background: none; border: none; color: #95a5a6; font-size: 16px; cursor: pointer; }
+        .calc-close:hover { color: white; }
+        #calc-screen {
+            width: 100%; height: 45px; background: #1a1a2e; border: 1px solid #34495e;
+            color: #2ecc71; font-size: 20px; text-align: right; padding: 8px 10px;
+            box-sizing: border-box; border-radius: 6px; margin-bottom: 10px; font-family: monospace;
+            overflow: hidden;
+        }
+        .calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .calc-key {
+            background: #2c3e50; color: white; border: none; padding: 12px;
+            font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s;
+            text-align: center;
+        }
+        .calc-key:hover { background: #34495e; }
+        .calc-key.op { background: #2980b9; }
+        .calc-key.op:hover { background: #3498db; }
+        .calc-key.eq { background: #27ae60; grid-column: span 2; }
+        .calc-key.eq:hover { background: #219653; }
+        .calc-key.clear { background: #c0392b; }
+        .calc-key.clear:hover { background: #e74c3c; }
+
+        /* 卡包選擇器 UI */
+        .pack-selector-container {
+            margin: 20px 0; padding: 15px; background: #16213e; border-radius: 10px;
+        }
+        .pack-selector-title { font-size: 16px; color: #f39c12; margin-bottom: 10px; font-weight: bold; }
+        .pack-grid {
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+        }
+        .pack-option {
+            background: #2c3e50; border: 2px solid #34495e; border-radius: 8px;
+            padding: 10px 15px; cursor: pointer; transition: 0.3s;
+            font-size: 16px; font-weight: bold; color: #cbd5e1; flex: 1; min-width: 120px;
+        }
+        .pack-option:hover { background: #34495e; }
+        .pack-option.active {
+            background: #2980b9; border-color: #3498db; color: #fff;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.6); transform: scale(1.05);
+        }
+
         .status-bar {
             display: flex; justify-content: space-between; align-items: center;
             background: #16213e; padding: 10px 20px; border-radius: 10px; margin-bottom: 20px;
         }
-        /* 👇 修改了 HP bar 的排版以容納連擊條 👇 */
         .hp-bar { font-size: 18px; color: #e74c3c; text-align: left; display: flex; align-items: center; gap: 10px;}
         .streak-badge { background: #d35400; color: white; padding: 3px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; }
-        
         .inventory { font-size: 14px; color: #f1c40f; text-align: right; font-weight: bold;}
         
         .tag {
@@ -87,18 +164,20 @@
         
         .gacha-title { color: white; font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;}
         .gacha-btn { margin-top: 30px; padding: 15px 40px; font-size: 20px; font-weight: bold; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px #c0392b; transition: 0.2s;}
-        .gacha-btn:active { transform: translateY(4px); box-shadow: none; }
         .gacha-btn-collect { background: #3498db; box-shadow: 0 4px #2980b9; }
 
         #collection-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
-            display: none; justify-content: flex-start; align-items: center; flex-direction: column; z-index: 300; padding-top: 50px; overflow-y: auto;
+            display: none; justify-content: flex-start; align-items: center; flex-direction: column; z-index: 300; padding-top: 30px; overflow-y: auto;
         }
-        .collection-header { color: #f1c40f; font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px #f39c12; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 90%; max-width: 800px; padding-bottom: 80px;}
+        .collection-header { color: #f1c40f; font-size: 28px; margin-bottom: 10px; text-shadow: 0 0 10px #f39c12; }
+        
+        .pack-section-title { width: 90%; max-width: 800px; text-align: left; font-size: 20px; color: #34db98; margin: 20px 0 10px 0; border-bottom: 2px solid #2c3e50; padding-bottom: 5px; }
+        
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 90%; max-width: 800px; padding-bottom: 20px;}
         .mini-card { background: #2c3e50; border-radius: 10px; padding: 10px; text-align: center; border: 2px solid #34495e; position: relative; }
-        .mini-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
-        .mini-card .name { font-size: 14px; font-weight: bold; color: white; }
+        .mini-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; aspect-ratio: 1/1; object-fit: cover; }
+        .mini-card .name { font-size: 14px; font-weight: bold; color: white; line-height: 1.2;}
         .mini-card .count { position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 14px; border: 2px solid #fff; z-index: 10; }
         
         .mini-card.unowned { border-color: #555; background: #1a252f; }
@@ -107,14 +186,52 @@
         
         .btn-synth { margin-top: 8px; padding: 6px 0; font-size: 13px; background: #e67e22; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; animation: pulse 1.5s infinite; }
         .btn-synth:hover { background: #d35400; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(230, 126, 34, 0); } 100% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0); } }
+        .btn-synth-sr { background: #9b59b6; box-shadow: 0 0 10px #9b59b6; animation: pulse-sr 1.2s infinite; }
+        .btn-synth-sr:hover { background: #8e44ad; }
         
-        .close-btn { margin-top: 30px; padding: 10px 30px; font-size: 18px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 50px;}
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(230, 126, 34, 0); } 100% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0); } }
+        @keyframes pulse-sr { 0% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.8); } 70% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); } 100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); } }
+        
+        .close-btn { margin-top: 20px; padding: 10px 30px; font-size: 18px; background: #95a5a6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 50px;}
     </style>
 </head>
 <body>
 
     <div id="correct-splash">⭕ 正確！</div>
+
+    <!-- 🧮 右下角懸浮計算機元件 -->
+    <button id="floating-calc-btn" onclick="toggleCalculator()">🧮 計算機</button>
+    <div id="calc-modal">
+        <div class="calc-header">
+            <span>簡易計算機</span>
+            <button class="calc-close" onclick="toggleCalculator()">✕</button>
+        </div>
+        <div id="calc-screen">0</div>
+        <div class="calc-keys">
+            <button class="calc-key clear" onclick="calcClear()">C</button>
+            <button class="calc-key op" onclick="calcAppend('/')">÷</button>
+            <button class="calc-key op" onclick="calcAppend('*')">×</button>
+            <button class="calc-key op" onclick="calcBackSpace()">⌫</button>
+            
+            <button class="calc-key" onclick="calcAppend('7')">7</button>
+            <button class="calc-key" onclick="calcAppend('8')">8</button>
+            <button class="calc-key" onclick="calcAppend('9')">9</button>
+            <button class="calc-key op" onclick="calcAppend('-')">-</button>
+            
+            <button class="calc-key" onclick="calcAppend('4')">4</button>
+            <button class="calc-key" onclick="calcAppend('5')">5</button>
+            <button class="calc-key" onclick="calcAppend('6')">6</button>
+            <button class="calc-key op" onclick="calcAppend('+')">+</button>
+            
+            <button class="calc-key" onclick="calcAppend('1')">1</button>
+            <button class="calc-key" onclick="calcAppend('2')">2</button>
+            <button class="calc-key" onclick="calcAppend('3')">3</button>
+            <button class="calc-key eq" onclick="calcEvaluate()">=</button>
+            
+            <button class="calc-key" onclick="calcAppend('0')" style="grid-column: span 2;">0</button>
+            <button class="calc-key" onclick="calcAppend('.')">.</button>
+        </div>
+    </div>
 
     <div id="gacha-overlay">
         <div class="gacha-title" id="gacha-title">✨ 連擊達成！獲得抽卡機會！ ✨</div>
@@ -128,19 +245,29 @@
 
     <div id="collection-modal">
         <div class="collection-header" id="collection-title">🏆 專屬集卡冊</div>
-        <div class="card-grid" id="collection-grid"></div>
+        <div id="collection-content" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        </div>
         <button class="close-btn" onclick="closeCollection()">返回首頁</button>
     </div>
 
     <div class="container">
         <div id="student-setup">
-            <h1>🏀 統測特訓：30題不間斷！</h1>
-            <div class="subtitle">連續答對 2 題即可抽卡！<br>(蒐集 5 張相同的 N 卡可融合為隱藏特效卡)</div>
+            <h1>⚡ 電容與Q=CV隨機特訓班 ⚡</h1>
+            <div class="subtitle">連續答對 2 題即可抽卡！(共 10 題隨機題庫)</div>
+            
+            <div class="warning-box">
+                ⚠️ 注意：請先輸入姓名並點擊【☁️ 1. 載入雲端圖鑑存檔】，再開始挑戰！否則辛苦抽到的卡片紀錄會被洗掉喔！
+            </div>
+
             <input type="text" id="student-name" placeholder="請輸入 班級+座號+姓名">
             
-            <button class="btn" id="btn-sync" style="background-color: #2980b9; box-shadow: 0 4px #1c5980;" onclick="syncCloudData()">☁️ 1. 載入雲端圖鑑存檔</button>
+            <div class="pack-selector-container">
+                <div class="pack-selector-title">👇 請選擇本次測驗的專屬抽卡包 👇</div>
+                <div class="pack-grid" id="pack-selector"></div>
+            </div>
             
-            <button class="btn btn-start" onclick="startGame()">▶️ 2. 開始 30 題大挑戰</button>
+            <button class="btn" id="btn-sync" style="background-color: #2980b9; box-shadow: 0 4px #1c5980;" onclick="syncCloudData()">☁️ 1. 載入雲端圖鑑存檔</button>
+            <button class="btn btn-start" onclick="startGame()">▶️ 2. 開始大挑戰</button>
             <button class="btn btn-collection" onclick="openCollection()">📖 查看我的圖鑑進度</button>
         </div>
 
@@ -166,6 +293,67 @@
     </div>
 
     <script>
+        // === 🧮 右下角計算機邏輯 ===
+        let calcDisplayValue = "0";
+        let calcJustEvaluated = false;
+
+        function toggleCalculator() {
+            const modal = document.getElementById('calc-modal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function updateCalcScreen() {
+            const screen = document.getElementById('calc-screen');
+            screen.innerText = calcDisplayValue;
+        }
+
+        function calcClear() {
+            calcDisplayValue = "0";
+            calcJustEvaluated = false;
+            updateCalcScreen();
+        }
+
+        function calcBackSpace() {
+            if (calcJustEvaluated) {
+                calcClear();
+                return;
+            }
+            calcDisplayValue = calcDisplayValue.length > 1 ? calcDisplayValue.slice(0, -1) : "0";
+            updateCalcScreen();
+        }
+
+        function calcAppend(char) {
+            if (calcJustEvaluated && !isNaN(char)) {
+                calcDisplayValue = char;
+                calcJustEvaluated = false;
+            } else {
+                if (calcDisplayValue === "0" && char !== '.') {
+                    calcDisplayValue = char;
+                } else {
+                    calcDisplayValue += char;
+                }
+                calcJustEvaluated = false;
+            }
+            updateCalcScreen();
+        }
+
+        function calcEvaluate() {
+            try {
+                let expression = calcDisplayValue.replace(/×/g, '*').replace(/÷/g, '/');
+                let result = eval(expression);
+                if (!isFinite(result)) {
+                    calcDisplayValue = "錯誤";
+                } else {
+                    calcDisplayValue = String(Number(result.toFixed(2)));
+                }
+                calcJustEvaluated = true;
+            } catch (error) {
+                calcDisplayValue = "錯誤";
+                calcJustEvaluated = true;
+            }
+            updateCalcScreen();
+        }
+
         // === 音效引擎 ===
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
@@ -197,653 +385,297 @@
             }
         }
 
-        const cardPool = [
-            { id: "c_sp1", name: "【SP】超古代覺醒・裂空座", rarity: "SP", chance: 0, image: "images/SP1.jpg" },
-            { id: "c1", name: "【UR】暗黑・洛奇亞", rarity: "UR", chance: 1, image: "images/UR1.jpg" },
-            { id: "c2", name: "【UR】光明・洛奇亞", rarity: "UR", chance: 1, image: "images/UR2.jpg" },
-            { id: "c3", name: "【UR】光明・鳳王", rarity: "UR", chance: 1, image: "images/UR3.jpg" },
-            { id: "c4", name: "【UR】對戰・鳳王", rarity: "UR", chance: 1, image: "images/UR4.jpg" },
-            { id: "c5", name: "【UR】期間限定・Twice", rarity: "UR", chance: 1, image: "images/UR5.png" },
-            { id: "c6", name: "【SSR】全圖洛奇亞", rarity: "SSR", chance: 2.5, image: "images/SSR1.jpg" },
-            { id: "c7", name: "【SSR】異色洛奇亞", rarity: "SSR", chance: 2.5, image: "images/SSR2.jpg" },
-            { id: "c8", name: "【SSR】浮雕洛奇亞", rarity: "SSR", chance: 2.5, image: "images/SSR3.jpg" },
-            { id: "c9", name: "【SSR】全圖鳳王", rarity: "SSR", chance: 2.5, image: "images/SSR4.jpg" },
-            { id: "c10", name: "【SR】洛奇亞ex", rarity: "SR", chance: 7.5, image: "images/SR1.jpg" },
-            { id: "c11", name: "【SR】鳳王ex", rarity: "SR", chance: 7.5, image: "images/SR2.jpg" },
-            { id: "c12", name: "【R】洛奇亞", rarity: "R", chance: 10, image: "images/R1.jpg" },
-            { id: "c13", name: "【R】鳳王", rarity: "R", chance: 10, image: "images/R2.jpg" },
-            { id: "c14", name: "【N】小山豬", rarity: "N", chance: 7.1, image: "images/N1.jpg" },
-            { id: "c15", name: "【N】阿羅拉小拳石", rarity: "N", chance: 7.1, image: "images/N2.jpg" },
-            { id: "c16", name: "【N】小火龍", rarity: "N", chance: 7.1, image: "images/N3.jpg" },
-            { id: "c17", name: "【N】阿羅拉烏波", rarity: "N", chance: 7.1, image: "images/N4.jpg" },
-            { id: "c18", name: "【N】愛吃豚", rarity: "N", chance: 7.1, image: "images/N5.jpg" },
-            { id: "c19", name: "【N】原野水母", rarity: "N", chance: 7.1, image: "images/N6.jpg" },
-            { id: "c20", name: "【N】光蚵仔", rarity: "N", chance: 7.4, image: "images/N7.jpg" }
-        ];
-
         // ==========================================
-        // 教師設定區：電子學 (555、波形產生器、濾波器) + 指定娛樂穿插
-        // 圖片請確保與 HTML 檔案放在同一層目錄 (或自行加上路徑)
+        // 📦 卡包資料設定
         // ==========================================
-        const quizData = {
-            // --- 第 1 關：555單穩態電路識別 ---
-            "q1": {
-                tag: "第 1 關：555計時器",
-                text: "觀察下圖，這是一個利用 555 計時器構成的什麼電路？<br><br><img src='uni.png' style='width:100%; max-width:300px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 單穩態多諧振盪器 (Monostable)", next: "q2", isCorrect: true },
-                    { text: "B. 無穩態多諧振盪器 (Astable)", next: "q1_help", log: "Q1錯: 腳位接法不對，無穩態的2和6腳會接在一起" },
-                    { text: "C. 雙穩態多諧振盪器 (Bistable)", next: "q1_help", log: "Q1錯: 555通常不做純雙穩態" },
-                    { text: "D. 施密特觸發器", next: "q1_help", log: "Q1錯: 施密特觸發器的接法不同" }
-                ]
-            },
-            "q1_help": {
-                tag: "💊 救援任務：看圖辨識",
-                text: "圖中的第(2)腳接了一個開關(SW)用來「觸發」，且只有一個電阻 R 和電容 C 決定時間。需要外面推一下才動作的，是哪種振盪器？",
-                options: [
-                    { text: "A. 單穩態 (戳一下動一次)", next: "q1", isCorrect: true }, 
-                    { text: "B. 無穩態 (自己會一直震)", next: "q1_help", log: "Q1救錯: 無穩態不需要按鈕開關喔" } 
-                ]
-            },
-
-            // --- 第 2 關：555單穩態脈波寬度 ---
-            "q2": {
-                tag: "第 2 關：單穩態公式",
-                text: "承上題的單穩態電路，當按下 SW 觸發後，輸出 Vo 會維持高電位一段時間 (tw)。請問脈波寬度 tw 的近似公式為何？",
-                options: [
-                    { text: "A. tw ≈ 1.1 RC", next: "q3", isCorrect: true },
-                    { text: "B. tw ≈ 0.693 RC", next: "q2_help", log: "Q2錯: 這是無穩態充放電的係數" },
-                    { text: "C. tw ≈ 1 / (2πRC)", next: "q2_help", log: "Q2錯: 這是濾波器的截止頻率公式" },
-                    { text: "D. tw ≈ RC", next: "q2_help", log: "Q2錯: 漏了常數" }
-                ]
-            },
-            "q2_help": {
-                tag: "💊 救援任務：充放電常數",
-                text: "單穩態電路中，電容從 0V 充電到 2/3 Vcc，根據 RC 充放電公式換算，前面的常數大約是「1.1」。請選出有 1.1 的公式：",
-                options: [
-                    { text: "A. 1.1 RC", next: "q2", isCorrect: true }, 
-                    { text: "B. 0.693 RC", next: "q2_help", log: "Q2救錯: 0.693 是充到一半(ln2)的係數" } 
-                ]
-            },
-
-            // --- 第 3 關：555無穩態電路識別 ---
-            "q3": {
-                tag: "第 3 關：555計時器",
-                text: "觀察下圖，第 2 腳與第 6 腳短接，這是一個利用 555 構成的什麼電路？<br><br><img src='uns.png' style='width:100%; max-width:250px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 無穩態多諧振盪器 (Astable)", next: "q4", isCorrect: true },
-                    { text: "B. 單穩態多諧振盪器 (Monostable)", next: "q3_help", log: "Q3錯: 單穩態有觸發開關" },
-                    { text: "C. 帶通濾波器", next: "q3_help", log: "Q3錯: 濾波器通常用 OPA" },
-                    { text: "D. 三角波產生器", next: "q3_help", log: "Q3錯: 555輸出是方波/脈波" }
-                ]
-            },
-            "q3_help": {
-                tag: "💊 救援任務：自給自足",
-                text: "圖中沒有外部按鈕，電容 C 透過 R1、R2 充電，再透過 R2 放電，不斷循環。這種不需要外面推，自己會一直震盪的電路叫什麼？",
-                options: [
-                    { text: "A. 無穩態", next: "q3", isCorrect: true }, 
-                    { text: "B. 單穩態", next: "q3_help", log: "Q3救錯: 單穩態不會自己一直震盪" } 
-                ]
-            },
-
-            // --- 第 4 關：555無穩態工作週期 ---
-            "q4": {
-                tag: "第 4 關：無穩態特性",
-                text: "承上題圖中的無穩態電路，充電時經過 (R1+R2)，放電時只經過 R2。請問此標準接法輸出的「工作週期 (Duty Cycle)」範圍為何？",
-                options: [
-                    { text: "A. 恆大於 50%", next: "q5", isCorrect: true },
-                    { text: "B. 恆等於 50%", next: "q4_help", log: "Q4錯: 因為充電電阻一定比放電電阻大" },
-                    { text: "C. 恆小於 50%", next: "q4_help", log: "Q4錯: 這樣代表放電比充電慢，但圖中放電只過R2" },
-                    { text: "D. 可以在 0%~100% 任意調整", next: "q4_help", log: "Q4錯: 需要外加二極體才能做到" }
-                ]
-            },
-            "q4_help": {
-                tag: "💊 救援任務：充慢放快",
-                text: "工作週期 = (充電時間 / 總時間)。充電路徑是 R1+R2，放電路徑只有 R2。因為 R1+R2 絕對大於 R2，充電時間比較長，所以工作週期一定會大於多少？",
-                options: [
-                    { text: "A. 50%", next: "q4", isCorrect: true }, 
-                    { text: "B. 25%", next: "q4_help", log: "Q4救錯: 不可能小於 50% 啦" } 
-                ]
-            },
-
-            // 🌟 第 5 關：娛樂穿插 (JOJO)
-            "q5": {
-                tag: "🌟 第 5 關：大腦休息 (動漫)",
-                text: "來點輕鬆的！在《JOJO的奇妙冒險》第三部中，主角空条承太郎的替身名稱是？",
-                options: [
-                    { text: "A. 白金之星", next: "q6", isCorrect: true },
-                    { text: "B. 瘋狂鑽石", next: "q5_help", log: "Q5錯: 這是第四部東方仗助的替身" },
-                    { text: "C. 黃金體驗", next: "q5_help", log: "Q5錯: 這是第五部喬魯諾的替身" },
-                    { text: "D. 隱者之紫", next: "q5_help", log: "Q5錯: 這是喬瑟夫的替身" }
-                ]
-            },
-            "q5_help": {
-                tag: "💊 提示：歐拉歐拉",
-                text: "他最喜歡喊「歐拉歐拉」，且名字跟星星(Star)有關。請選出正確的替身名稱：",
-                options: [
-                    { text: "A. 白金之星", next: "q5", isCorrect: true },
-                    { text: "B. 瘋狂鑽石", next: "q5_help", log: "Q5救錯: 鑽石是第四部主角的啦！" }
-                ]
-            },
-
-            // --- 第 6 關：方波產生器 ---
-            "q6": {
-                tag: "第 6 關：波形產生",
-                text: "觀察下圖，這是一個使用運算放大器 (OPA) 構成的振盪電路，請問輸出 Vo 的波形為何？<br><br><img src='sqr.png' style='width:100%; max-width:250px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 方波", next: "q7", isCorrect: true },
-                    { text: "B. 正弦波", next: "q6_help", log: "Q6錯: 這是由施密特觸發器改裝的，輸出只有飽和電壓" },
-                    { text: "C. 三角波", next: "q6_help", log: "Q6錯: 三角波需要有獨立的積分器" },
-                    { text: "D. 鋸齒波", next: "q6_help", log: "Q6錯: 不具備充放電不對稱的特性" }
-                ]
-            },
-            "q6_help": {
-                tag: "💊 救援任務：正回授與飽和",
-                text: "圖中 OPA 的輸出拉回了「正端(+)」，這代表它是一個施密特觸發器。正回授的 OPA 輸出只會卡在最高(+Vsat)和最低(-Vsat)，跳來跳去會畫出什麼波形？",
-                options: [
-                    { text: "A. 方波 (直上直下)", next: "q6", isCorrect: true },
-                    { text: "B. 正弦波", next: "q6_help", log: "Q6救錯: 正弦波需要負回授與相移網路" }
-                ]
-            },
-
-            // --- 第 7 關：方波週期影響 ---
-            "q7": {
-                tag: "第 7 關：振盪週期",
-                text: "承上題的方波產生器，電容 C 透過電阻 R 進行充放電。如果想「降低」輸出的振盪頻率（變慢），下列哪個做法有效？",
-                options: [
-                    { text: "A. 增加電容 C 的容值", next: "q8", isCorrect: true },
-                    { text: "B. 減少電容 C 的容值", next: "q7_help", log: "Q7錯: 容值變小，充放電變快，頻率會升高" },
-                    { text: "C. 減少電阻 R 的阻值", next: "q7_help", log: "Q7錯: 阻值變小，電流變大，頻率會升高" },
-                    { text: "D. 將 R1 與 R2 短路", next: "q7_help", log: "Q7錯: 這樣就沒有遲滯區間，無法正常震盪" }
-                ]
-            },
-            "q7_help": {
-                tag: "💊 救援任務：大水缸理論",
-                text: "頻率變慢，代表充電和放電要花「更久的時間」。把電容想成水缸，水缸越大，裝滿水需要的時間就越久。所以要？",
-                options: [
-                    { text: "A. 增加電容 C", next: "q7", isCorrect: true },
-                    { text: "B. 減少電容 C", next: "q7_help", log: "Q7救錯: 水缸變小馬上就滿了，頻率會變快！" }
-                ]
-            },
-
-            // --- 第 8 關：三角波產生器識別 ---
-            "q8": {
-                tag: "第 8 關：波形產生",
-                text: "觀察下圖，這個電路串聯了兩個 OPA，用來產生三角波。請問前級 OPA1 與後級 OPA2 分別扮演什麼角色？<br><br><img src='tri.png' style='width:100%; max-width:350px; border-radius:8px;'>",
-                options: [
-                    { text: "A. OPA1：施密特觸發器，OPA2：積分器", next: "q9", isCorrect: true },
-                    { text: "B. OPA1：積分器，OPA2：施密特觸發器", next: "q8_help", log: "Q8錯: 順序反了" },
-                    { text: "C. OPA1：微分器，OPA2：比較器", next: "q8_help", log: "Q8錯: 電容在回授端是積分，不是微分" },
-                    { text: "D. 兩者皆為反相放大器", next: "q8_help", log: "Q8錯: 無法產生震盪" }
-                ]
-            },
-            "q8_help": {
-                tag: "💊 救援任務：分工合作",
-                text: "第一級 OPA1 接在正端(+)是產生「方波」的施密特觸發器。第二級 OPA2 的電容 C 接在輸出與反相端(-)之間，這是一個能把方波變成三角波的什麼器？",
-                options: [
-                    { text: "A. 積分器", next: "q8", isCorrect: true },
-                    { text: "B. 微分器", next: "q8_help", log: "Q8救錯: 微分器的電容是接在輸入端喔" }
-                ]
-            },
-
-            // --- 第 9 關：三角波觀測點 ---
-            "q9": {
-                tag: "第 9 關：波形量測",
-                text: "承上題的三角波產生器，如果我們要用示波器量測完美的「三角波」，探棒應該接在哪一個端點？",
-                options: [
-                    { text: "A. vo 端點 (OPA2 的輸出)", next: "q10", isCorrect: true },
-                    { text: "B. vo1 端點 (OPA1 的輸出)", next: "q9_help", log: "Q9錯: OPA1 輸出的是方波" },
-                    { text: "C. OPA1 的反相輸入端", next: "q9_help", log: "Q9錯: 這裡接地，是 0V" },
-                    { text: "D. OPA2 的反相輸入端", next: "q9_help", log: "Q9錯: 這裡是虛接地，電壓趨近於零" }
-                ]
-            },
-            "q9_help": {
-                tag: "💊 救援任務：誰負責畫三角",
-                text: "方波(vo1)經過第二級的「積分器(OPA2)」後，才會被積分成平滑上升與下降的三角波。所以三角波會出現在哪裡？",
-                options: [
-                    { text: "A. 積分器 OPA2 的輸出 (vo)", next: "q9", isCorrect: true },
-                    { text: "B. 觸發器 OPA1 的輸出 (vo1)", next: "q9_help", log: "Q9救錯: 這裡是還沒處理過的方波！" }
-                ]
-            },
-
-            // 🎸 第 10 關：娛樂穿插 (五月天 1)
-            "q10": {
-                tag: "🎸 第 10 關：五迷簽到",
-                text: "大腦休息一下！台灣天團「五月天」中，身兼演唱會的發言擔當，並負責彈奏「貝斯 (Bass)」的團員是？",
-                options: [
-                    { text: "A. 瑪莎", next: "q11", isCorrect: true },
-                    { text: "B. 阿信", next: "q10_help", log: "Q10錯: 他是主唱" },
-                    { text: "C. 怪獸", next: "q10_help", log: "Q10錯: 他是吉他手兼團長" },
-                    { text: "D. 冠佑", next: "q10_help", log: "Q10錯: 他是打鼓的" }
-                ]
-            },
-            "q10_help": {
-                tag: "💊 提示：長髮飄逸",
-                text: "他以前留著長髮，講話非常犀利幽默，最愛跟阿信在台上鬥嘴。這位貝斯手叫做？",
-                options: [
-                    { text: "A. 瑪莎", next: "q10", isCorrect: true },
-                    { text: "B. 石頭", next: "q10_help", log: "Q10救錯: 石頭是吉他手啦" }
-                ]
-            },
-
-            // --- 第 11 關：低通濾波器識別 ---
-            "q11": {
-                tag: "第 11 關：主動濾波器",
-                text: "觀察下圖，這是一個基本的主動濾波器。由 RC 網路與非反相放大器組成。請問這是什麼濾波器？<br><br><img src='lp.png' style='width:100%; max-width:250px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 低通濾波器 (Low-Pass Filter)", next: "q12", isCorrect: true },
-                    { text: "B. 高通濾波器 (High-Pass Filter)", next: "q11_help", log: "Q11錯: 高通的電容會接在信號串聯路徑上" },
-                    { text: "C. 帶通濾波器", next: "q11_help", log: "Q11錯: 帶通需要至少兩個電容" },
-                    { text: "D. 帶拒濾波器", next: "q11_help", log: "Q11錯: 帶拒電路更複雜" }
-                ]
-            },
-            "q11_help": {
-                tag: "💊 救援任務：電容的特性",
-                text: "電容(C)對高頻訊號形同「短路」。圖中的 C 接到地上，代表高頻率的訊號過來時，會被電容直接「拉去接地」吃掉。高頻過不去，只有低頻過得去，這叫做？",
-                options: [
-                    { text: "A. 低通濾波器", next: "q11", isCorrect: true },
-                    { text: "B. 高通濾波器", next: "q11_help", log: "Q11救錯: 高頻都被接地了，怎麼可能高通！" }
-                ]
-            },
-
-            // --- 第 12 關：濾波器增益 ---
-            "q12": {
-                tag: "第 12 關：增益計算",
-                text: "承上題圖中的低通濾波器，在低頻通帶(Passband)時，其電壓增益 (Vo / Vi) 公式為何？",
-                options: [
-                    { text: "A. 1 + (R1 / R2)", next: "q13", isCorrect: true },
-                    { text: "B. - R1 / R2", next: "q12_help", log: "Q12錯: 這是反相放大器的增益" },
-                    { text: "C. R2 / R1", next: "q12_help", log: "Q12錯: 顛倒了" },
-                    { text: "D. 1", next: "q12_help", log: "Q12錯: 這是電壓隨耦器" }
-                ]
-            },
-            "q12_help": {
-                tag: "💊 救援任務：非反相放大",
-                text: "訊號 Vi 是從 OPA 的「正端(+)」進入的，這是一個標準的「非反相放大器」。非反相放大器的增益公式永遠是「1 + (回授電阻/接地電阻)」。",
-                options: [
-                    { text: "A. 1 + (R1 / R2)", next: "q12", isCorrect: true },
-                    { text: "B. - R1 / R2", next: "q12_help", log: "Q12救錯: 負號是反相放大器才有的" }
-                ]
-            },
-
-            // --- 第 13 關：高通濾波器識別 ---
-            "q13": {
-                tag: "第 13 關：主動濾波器",
-                text: "觀察下圖，將輸入端的 R 與 C 位置對調後，這變成了什麼濾波器？<br><br><img src='hp.png' style='width:100%; max-width:250px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 高通濾波器 (High-Pass Filter)", next: "q14", isCorrect: true },
-                    { text: "B. 低通濾波器 (Low-Pass Filter)", next: "q13_help", log: "Q13錯: 低通的電容會接地" },
-                    { text: "C. 全通濾波器", next: "q13_help", log: "Q13錯: 沒有這種基本接法" },
-                    { text: "D. 帶通濾波器", next: "q13_help", log: "Q13錯: 帶通需要高低通組合" }
-                ]
-            },
-            "q13_help": {
-                tag: "💊 救援任務：電容擋路",
-                text: "電容(C)串聯在訊號輸入的路徑上。直流電(頻率0)遇到電容會被「斷路」擋下來；高頻訊號則覺得電容像短路一樣暢通無阻。高頻過得去，叫做？",
-                options: [
-                    { text: "A. 高通濾波器", next: "q13", isCorrect: true },
-                    { text: "B. 低通濾波器", next: "q13_help", log: "Q13救錯: 低頻都被電容擋死了喔" }
-                ]
-            },
-
-            // --- 第 14 關：截止頻率公式 ---
-            "q14": {
-                tag: "第 14 關：截止頻率",
-                text: "無論是一階高通還是低通濾波器，決定「截止頻率 (fc)」的 RC 網路公式皆為下列何者？",
-                options: [
-                    { text: "A. fc = 1 / (2πRC)", next: "q15", isCorrect: true },
-                    { text: "B. fc = 1 / (RC)", next: "q14_help", log: "Q14錯: 漏掉 2π" },
-                    { text: "C. fc = 2πRC", next: "q14_help", log: "Q14錯: 公式顛倒了" },
-                    { text: "D. fc = R / C", next: "q14_help", log: "Q14錯: 單位完全不對" }
-                ]
-            },
-            "q14_help": {
-                tag: "💊 救援任務：頻率基本公式",
-                text: "頻率的單位是赫茲(Hz)，在交流電的世界裡，要把角頻率(ω = 1/RC)換算成一般頻率 f，必須除以一圈的弧度「2π」。所以分母要有 2πRC！",
-                options: [
-                    { text: "A. 1 / (2πRC)", next: "q14", isCorrect: true },
-                    { text: "B. 2πRC", next: "q14_help", log: "Q14救錯: RC 必須在分母才對" }
-                ]
-            },
-
-            // 🏀 第 15 關：娛樂穿插 (NBA)
-            "q15": {
-                tag: "🏀 第 15 關：大腦休息 (體育)",
-                text: "換個心情！NBA 金州勇士隊的當家球星 Stephen Curry，徹底改變了現代籃球的打法，他最著名的籃球絕技是什麼？",
-                options: [
-                    { text: "A. 超大號三分球", next: "q16", isCorrect: true },
-                    { text: "B. 罰球線起跳灌籃", next: "q15_help", log: "Q15錯: 這是 Michael Jordan 或 Zach LaVine 的絕技" },
-                    { text: "C. 歐洲步上籃", next: "q15_help", log: "Q15錯: 這是 Manu Ginóbili 的招牌" },
-                    { text: "D. 禁區天勾", next: "q15_help", log: "Q15錯: 這是 Kareem Abdul-Jabbar 的絕招" }
-                ]
-            },
-            "q15_help": {
-                tag: "💊 提示：三分神射手",
-                text: "Curry 是 NBA 歷史上投進最多三分球的紀錄保持人，他最擅長的就是從很遠的地方投籃。也就是？",
-                options: [
-                    { text: "A. 超大號三分球", next: "q15", isCorrect: true },
-                    { text: "B. 禁區天勾", next: "q15_help", log: "Q15救錯: 他身材在 NBA 算嬌小，不會一直打禁區啦！" }
-                ]
-            },
-
-            // --- 第 16 關：帶通濾波器識別 ---
-            "q16": {
-                tag: "第 16 關：組合濾波器",
-                text: "觀察下圖，這是一個利用兩級 OPA 串聯構成的電路。請問這是什麼濾波器？<br><br><img src='bp.png' style='width:100%; max-width:350px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 帶通濾波器 (Band-Pass Filter)", next: "q17", isCorrect: true },
-                    { text: "B. 帶拒濾波器 (Band-Reject Filter)", next: "q16_help", log: "Q16錯: 帶拒通常需要用並聯相加的方式" },
-                    { text: "C. 純高通濾波器", next: "q16_help", log: "Q16錯: 右邊還有一級低通喔" },
-                    { text: "D. 純低通濾波器", next: "q16_help", log: "Q16錯: 左邊有一級高通喔" }
-                ]
-            },
-            "q16_help": {
-                tag: "💊 救援任務：串聯的奧秘",
-                text: "左邊第一級是串聯電容 (高通)，右邊第二級是接地電容 (低通)。把「高通」跟「低通」串聯在一起，就像設了上下限，只讓中間的頻段通過。這叫做？",
-                options: [
-                    { text: "A. 帶通濾波器", next: "q16", isCorrect: true },
-                    { text: "B. 帶拒濾波器", next: "q16_help", log: "Q16救錯: 帶通才是只讓中間通過喔" }
-                ]
-            },
-
-            // --- 第 17 關：帶通濾波器條件 ---
-            "q17": {
-                tag: "第 17 關：帶通條件",
-                text: "承上題，要讓這兩級串聯電路成功發揮「帶通(Band-Pass)」的功能，高通的截止頻率 (fL) 與低通的截止頻率 (fH) 必須滿足什麼條件？",
-                options: [
-                    { text: "A. fH 必須大於 fL (fH > fL)", next: "q18", isCorrect: true },
-                    { text: "B. fL 必須大於 fH (fL > fH)", next: "q17_help", log: "Q17錯: 這樣頻帶會交錯，甚麼訊號都過不去" },
-                    { text: "C. 兩者必須相等", next: "q17_help", log: "Q17錯: 這樣頻寬為0" },
-                    { text: "D. 毫無限制", next: "q17_help", log: "Q17錯: 條件錯了就無法帶通" }
-                ]
-            },
-            "q17_help": {
-                tag: "💊 救援任務：邏輯交集",
-                text: "高通負責擋掉低音(放行 fL 以上)，低通負責擋掉高音(放行 fH 以下)。要讓中間有路可走，上限(fH)當然要大於下限(fL)！就像年齡限制 18歲(fL) 到 65歲(fH) 一樣。",
-                options: [
-                    { text: "A. fH 大於 fL", next: "q17", isCorrect: true },
-                    { text: "B. fL 大於 fH", next: "q17_help", log: "Q17救錯: 這樣就沒人能通過了" }
-                ]
-            },
-
-            // --- 第 18 關：帶拒濾波器識別 ---
-            "q18": {
-                tag: "第 18 關：組合濾波器",
-                text: "觀察下圖，輸入訊號分成上下兩路（一路高通、一路低通），最後再用加法器結合。這是什麼濾波器？<br><br><img src='br.png' style='width:100%; max-width:350px; border-radius:8px;'>",
-                options: [
-                    { text: "A. 帶拒濾波器 (Band-Reject Filter)", next: "q19", isCorrect: true },
-                    { text: "B. 帶通濾波器", next: "q18_help", log: "Q18錯: 帶通是串聯" },
-                    { text: "C. 全通濾波器", next: "q18_help", log: "Q18錯: 頻率響應不同" },
-                    { text: "D. 儀表放大器", next: "q18_help", log: "Q18錯: 儀表放大器不含濾波電容" }
-                ]
-            },
-            "q18_help": {
-                tag: "💊 救援任務：分進合擊",
-                text: "訊號兵分兩路：低音走下面(低通)通過，高音走上面(高通)通過。最後加起來，代表「低音和高音都過了，只有中間的被拒絕」。這叫做？",
-                options: [
-                    { text: "A. 帶拒濾波器", next: "q18", isCorrect: true },
-                    { text: "B. 帶通濾波器", next: "q18_help", log: "Q18救錯: 帶通是只讓中間過喔！" }
-                ]
-            },
-
-            // --- 第 19 關：陷波濾波器 ---
-            "q19": {
-                tag: "第 19 關：帶拒應用",
-                text: "當「帶拒濾波器」的阻擋頻帶被設計得「非常窄」（Q值極高），專門用來消除特定單一頻率（例如 60Hz 電源雜訊）時，又被稱為什麼？",
-                options: [
-                    { text: "A. 陷波濾波器 (Notch Filter)", next: "q20", isCorrect: true },
-                    { text: "B. 峰波濾波器 (Peak Filter)", next: "q19_help", log: "Q19錯: 這是窄頻帶通" },
-                    { text: "C. 梳狀濾波器", next: "q19_help", log: "Q19錯: 梳狀會有很多個阻擋點" },
-                    { text: "D. 漣波濾波器", next: "q19_help", log: "Q19錯: 沒有這個專有名詞" }
-                ]
-            },
-            "q19_help": {
-                tag: "💊 救援任務：挖一個洞",
-                text: "專門針對特定頻率「挖一個深深的陷阱」把它消除掉的濾波器，英文叫 Notch，中文就叫做「陷波」濾波器！",
-                options: [
-                    { text: "A. 陷波濾波器", next: "q19", isCorrect: true },
-                    { text: "B. 峰波濾波器", next: "q19_help", log: "Q19救錯: 峰波是凸起來的，陷波是凹下去的" }
-                ]
-            },
-
-            // 🗡️ 第 20 關：娛樂穿插 (進擊的巨人)
-            "q20": {
-                tag: "🗡️ 第 20 關：大腦休息 (動漫)",
-                text: "動漫時間！在神作動漫《進擊的巨人》中，主角艾連·葉卡為了驅逐世上所有的巨人，他選擇加入了哪一個軍團？",
-                options: [
-                    { text: "A. 調查兵團", next: "q21", isCorrect: true },
-                    { text: "B. 駐紮兵團", next: "q20_help", log: "Q20錯: 他們負責守護牆壁" },
-                    { text: "C. 憲兵團", next: "q20_help", log: "Q20錯: 他們在內地保護國王" },
-                    { text: "D. 訓練兵團", next: "q20_help", log: "Q20錯: 這是新兵待的地方" }
-                ]
-            },
-            "q20_help": {
-                tag: "💊 提示：自由之翼",
-                text: "這個軍團的徽章是「自由之翼」，他們總是冒著生命危險離開牆外，去探索外面的世界與對抗巨人。叫做什麼兵團？",
-                options: [
-                    { text: "A. 調查兵團", next: "q20", isCorrect: true },
-                    { text: "B. 憲兵團", next: "q20_help", log: "Q20救錯: 憲兵團都躲在最裡面啦！" }
-                ]
-            },
-
-            // --- 第 21 關：主動與被動濾波器差異 ---
-            "q21": {
-                tag: "第 21 關：濾波器比較",
-                text: "主動濾波器（使用 OPA）比起傳統的被動濾波器（僅使用 R、L、C），最大的優點是「不需使用電感器」，且還具備什麼特性？",
-                options: [
-                    { text: "A. 能提供電壓增益 (訊號放大)", next: "q22", isCorrect: true },
-                    { text: "B. 消耗功率為零", next: "q21_help", log: "Q21錯: OPA 需要插電，有功率消耗" },
-                    { text: "C. 可以操作在極高頻 (數GHz)", next: "q21_help", log: "Q21錯: OPA 有頻寬限制，高頻反而不適用" },
-                    { text: "D. 不需要電源供應", next: "q21_help", log: "Q21錯: 主動元件一定要吃電" }
-                ]
-            },
-            "q21_help": {
-                tag: "💊 救援任務：OPA的優勢",
-                text: "被動元件(電阻電容)只會消耗能量，訊號越濾越小。但加上了運算「放大」器(OPA)後，除了濾波，它還能幫你把微弱的訊號做什麼？",
-                options: [
-                    { text: "A. 訊號放大 (提供增益)", next: "q21", isCorrect: true },
-                    { text: "B. 吸收輻射", next: "q21_help", log: "Q21救錯: OPA 沒有這種科幻功能" }
-                ]
-            },
-
-            // --- 第 22 關：濾波器階數 ---
-            "q22": {
-                tag: "第 22 關：濾波特性",
-                text: "濾波器的「階數 (Order)」決定了它在截止頻率之後，衰減滾降的陡峭程度。一階濾波器的衰減率為何？",
-                options: [
-                    { text: "A. -20 dB / decade", next: "q23", isCorrect: true },
-                    { text: "B. -40 dB / decade", next: "q22_help", log: "Q22錯: 這是二階濾波器的衰減率" },
-                    { text: "C. -60 dB / decade", next: "q22_help", log: "Q22錯: 這是三階濾波器的衰減率" },
-                    { text: "D. -3 dB / decade", next: "q22_help", log: "Q22錯: -3dB 是截止點的下降量" }
-                ]
-            },
-            "q22_help": {
-                tag: "💊 救援任務：階數與衰減",
-                text: "每增加一個階數(多一個 RC 網路)，每十倍頻(decade)的衰減量就會多掉 20 dB。所以「一階」就是最基本的多少？",
-                options: [
-                    { text: "A. -20 dB / decade", next: "q22", isCorrect: true },
-                    { text: "B. -40 dB / decade", next: "q22_help", log: "Q22救錯: 這是二階的數字喔" }
-                ]
-            },
-
-            // --- 第 23 關：555 內部結構 ---
-            "q23": {
-                tag: "第 23 關：555 計時器",
-                text: "555 計時器 IC 內部，用來設定比較器參考電壓 (2/3 Vcc 與 1/3 Vcc) 的分壓電阻，是由三個阻值相同的電阻串聯而成。這個阻值是多少？",
-                options: [
-                    { text: "A. 5 kΩ", next: "q24", isCorrect: true },
-                    { text: "B. 10 kΩ", next: "q23_help", log: "Q23錯: 阻值不對" },
-                    { text: "C. 555 Ω", next: "q23_help", log: "Q23錯: 這是迷思陷阱！" },
-                    { text: "D. 1 MΩ", next: "q23_help", log: "Q23錯: 阻值太大" }
-                ]
-            },
-            "q23_help": {
-                tag: "💊 救援任務：名字的由來",
-                text: "555 這個經典 IC 的命名由來，有一說就是因為它內部剛好用了「三個 5 千歐姆」的電阻來分壓。是幾 kΩ？",
-                options: [
-                    { text: "A. 5 kΩ", next: "q23", isCorrect: true },
-                    { text: "B. 555 Ω", next: "q23_help", log: "Q23救錯: 是三個 5k，不是 555 歐姆！" }
-                ]
-            },
-
-            // --- 第 24 關：無穩態應用 ---
-            "q24": {
-                tag: "第 24 關：電路應用",
-                text: "下列哪一種裝置或應用，最適合使用「555 無穩態多諧振盪器」來實現？",
-                options: [
-                    { text: "A. 汽車方向燈 (固定頻率閃爍)", next: "q25", isCorrect: true },
-                    { text: "B. 觸控式電梯按鈕", next: "q24_help", log: "Q24錯: 需要觸發，應該用單穩態" },
-                    { text: "C. 警報器延時關閉", next: "q24_help", log: "Q24錯: 延遲功能是單穩態" },
-                    { text: "D. 音響的低音加強", next: "q24_help", log: "Q24錯: 這是低通濾波器的工作" }
-                ]
-            },
-            "q24_help": {
-                tag: "💊 救援任務：持續跳動",
-                text: "無穩態電路的特色就是「通電後自己會一直規律地忽高忽低跳動」，不用人按。選項中哪個是一直規律閃爍的？",
-                options: [
-                    { text: "A. 汽車方向燈閃爍", next: "q24", isCorrect: true },
-                    { text: "B. 觸控按鈕", next: "q24_help", log: "Q24救錯: 按鈕要人碰，那是單穩態" }
-                ]
-            },
-
-            // 🎸 第 25 關：娛樂穿插 (五月天 2)
-            "q25": {
-                tag: "🎸 第 25 關：五迷簽到",
-                text: "「加入五月天，永遠不會太遲！」這句感動無數粉絲，並成為五月天演唱會經典口號的名言，是出自哪一位團員之口？",
-                options: [
-                    { text: "A. 阿信", next: "q26", isCorrect: true },
-                    { text: "B. 怪獸", next: "q25_help", log: "Q25錯: 雖然是團長，但這句是主唱講的" },
-                    { text: "C. 石頭", next: "q25_help", log: "Q25錯: 這是阿信的經典語錄" },
-                    { text: "D. 冠佑", next: "q25_help", log: "Q25錯: 冠佑通常是負責被虧的" }
-                ]
-            },
-            "q25_help": {
-                tag: "💊 提示：主唱大人",
-                text: "這句話通常是在演唱會的感性 Talking 橋段，由拿著麥克風、負責寫詞的主唱說出來的。請問他是？",
-                options: [
-                    { text: "A. 阿信", next: "q25", isCorrect: true },
-                    { text: "B. 瑪莎", next: "q25_help", log: "Q25救錯: 瑪莎的發言通常比較毒舌啦！" }
-                ]
-            },
-
-            // --- 第 26 關：方波轉三角波 ---
-            "q26": {
-                tag: "第 26 關：波形轉換",
-                text: "如果我們已經有一個 555 產生的「方波」，想將它轉換成「三角波」，只需要通過下列哪一種 OPA 電路即可？",
-                options: [
-                    { text: "A. 積分器", next: "q27", isCorrect: true },
-                    { text: "B. 微分器", next: "q26_help", log: "Q26錯: 方波過微分器會變成極窄的脈衝(針狀波)" },
-                    { text: "C. 電壓隨耦器", next: "q26_help", log: "Q26錯: 輸出的波形不變，還是方波" },
-                    { text: "D. 施密特觸發器", next: "q26_help", log: "Q26錯: 已經是方波了，觸發器只會讓它更方" }
-                ]
-            },
-            "q26_help": {
-                tag: "💊 救援任務：面積的累積",
-                text: "方波是常數(平的)，在微積分中，常數經過「積分」後，會變成斜率固定的斜線(一次函數)，也就是三角波的形狀！",
-                options: [
-                    { text: "A. 積分器", next: "q26", isCorrect: true },
-                    { text: "B. 微分器", next: "q26_help", log: "Q26救錯: 微分會抓瞬間變化，變成針狀脈衝喔" }
-                ]
-            },
-
-            // --- 第 27 關：頻帶頻率關係 ---
-            "q27": {
-                tag: "第 27 關：濾波器特性",
-                text: "關於濾波器的截止頻率 (fc)，在頻率響應曲線上，代表此時的輸出功率下降到最大功率的多少？",
-                options: [
-                    { text: "A. 1/2 (即 -3dB)", next: "q28", isCorrect: true },
-                    { text: "B. 1/4 (即 -6dB)", next: "q27_help", log: "Q27錯: 這是電流減半的功率點" },
-                    { text: "C. 1/10 (即 -10dB)", next: "q27_help", log: "Q27錯: 數值不對" },
-                    { text: "D. 完全衰減到 0", next: "q27_help", log: "Q27錯: 濾波器無法做到瞬間垂直衰減" }
-                ]
-            },
-            "q27_help": {
-                tag: "💊 救援任務：半功率點",
-                text: "截止頻率又被稱為「半功率頻率」。因為此時輸出的電壓會掉到原來的 0.707 倍，平方後的功率剛好掉到「一半」，對應的分貝數就是 -3dB！",
-                options: [
-                    { text: "A. 1/2 (即 -3dB)", next: "q27", isCorrect: true },
-                    { text: "B. 1/4", next: "q27_help", log: "Q27救錯: 是剩下一半喔" }
-                ]
-            },
-
-            // --- 第 28 關：頻寬運算 ---
-            "q28": {
-                tag: "第 28 關：頻寬定義",
-                text: "一個帶通濾波器，測得其低頻截止頻率為 1 kHz，高頻截止頻率為 10 kHz，請問這個濾波器的「頻寬 (Bandwidth, BW)」是多少？",
-                options: [
-                    { text: "A. 9 kHz", next: "q29", isCorrect: true },
-                    { text: "B. 11 kHz", next: "q28_help", log: "Q28錯: 不是相加，是相減" },
-                    { text: "C. 10 kHz", next: "q28_help", log: "Q28錯: 沒有減去下限" },
-                    { text: "D. 1 kHz", next: "q28_help", log: "Q28錯: 計算錯誤" }
-                ]
-            },
-            "q28_help": {
-                tag: "💊 救援任務：算距離",
-                text: "頻寬(BW)就是「可以通過的頻率範圍有多寬」。只要把上限頻率減掉下限頻率即可： 10kHz - 1kHz = ?",
-                options: [
-                    { text: "A. 9 kHz", next: "q28", isCorrect: true },
-                    { text: "B. 11 kHz", next: "q28_help", log: "Q28救錯: 是相減，不是相加啦" }
-                ]
-            },
-
-            // --- 第 29 關：555 單穩態腳位 5 ---
-            "q29": {
-                tag: "第 29 關：555 內部細節",
-                text: "回顧第 1 關的 555 單穩態圖，IC 的第 5 腳 (控制電壓端) 通常會接一個 0.01μF 的小電容到地。這個電容的功用是什麼？",
-                options: [
-                    { text: "A. 旁路掉高頻雜訊，穩定內部比較器的參考電壓", next: "q30", isCorrect: true },
-                    { text: "B. 決定輸出的脈波寬度", next: "q29_help", log: "Q29錯: 決定時間的是第 6, 7 腳接的外部 RC" },
-                    { text: "C. 提供 IC 電源", next: "q29_help", log: "Q29錯: 電源是第 8 腳" },
-                    { text: "D. 讓輸出訊號變平滑", next: "q29_help", log: "Q29錯: 第 5 腳不影響輸出端形狀" }
-                ]
-            },
-            "q29_help": {
-                tag: "💊 救援任務：防雜訊濾波",
-                text: "第 5 腳直接連到內部 2/3 Vcc 的參考點。為了怕外界干擾讓這個標準電壓亂飄，接上小電容可以把「雜訊」吸到地裡面去。也就是為了？",
-                options: [
-                    { text: "A. 濾除雜訊，穩定電壓", next: "q29", isCorrect: true },
-                    { text: "B. 決定脈波寬度", next: "q29_help", log: "Q29救錯: 這是第 6, 7 腳外接大電容的工作" }
-                ]
-            },
-
-            // 🎸 第 30 關：最終魔王 (電子與五月天結合)
-            "q30": {
-                tag: "🏆 最終關：綜合應用",
-                text: "最後一題！假設五月天演唱會的音響工程師，想要把吉他發出的聲音中，那些刺耳的「高頻雜音」濾掉，只保留低沉渾厚的聲音。他應該在混音器加上我們今天學的哪一種電路？",
-                options: [
-                    { text: "A. 低通濾波器 (Low-Pass Filter)", next: "end", isCorrect: true },
-                    { text: "B. 高通濾波器 (High-Pass Filter)", next: "q30_help", log: "Q30錯: 這樣低音就不見了，只剩刺耳高音" },
-                    { text: "C. 無穩態多諧振盪器", next: "q30_help", log: "Q30錯: 這會讓喇叭發出固定的嗶嗶聲" },
-                    { text: "D. 施密特觸發器", next: "q30_help", log: "Q30錯: 音樂訊號會被破壞成方波(嚴重破音)" }
-                ]
-            },
-            "q30_help": {
-                tag: "💊 救援任務：留誰就叫什麼通",
-                text: "濾波器的命名法則是「保留下來的頻段」。工程師想要「保留低音」、「砍掉高音」。讓低頻通過的電路叫做？",
-                options: [
-                    { text: "A. 低通濾波器", next: "q30", isCorrect: true },
-                    { text: "B. 高通濾波器", next: "q30_help", log: "Q30救錯: 這樣就只聽得到高頻雜音啦！" }
+        const cardPacks = {
+            "phase1": {
+                name: "⚡ 第一階段",
+                cards: [
+                    { id: "c_sp1", name: "【SP】超古代覺醒・裂空座", rarity: "SP", chance: 0, image: "images/SP1.jpg" },
+                    { id: "c1", name: "【UR】暗黑・洛奇亞", rarity: "UR", chance: 0.375, image: "images/UR1.jpg" },
+                    { id: "c2", name: "【UR】光明・洛奇亞", rarity: "UR", chance: 0.375, image: "images/UR2.jpg" },
+                    { id: "c3", name: "【UR】光明・鳳王", rarity: "UR", chance: 0.375, image: "images/UR3.jpg" },
+                    { id: "c4", name: "【UR】對戰・鳳王", rarity: "UR", chance: 0.375, image: "images/UR4.jpg" },
+                    { id: "c5", name: "【UR】期間限定・Twice", rarity: "UR", chance: 0.375, image: "images/UR5.png" },
+                    { id: "c6", name: "【UR】籃球之神・喬丹", rarity: "UR", chance: 0.375, image: "images/MJ_UR.png" },
+                    { id: "c31", name: "【UR】期間限定・子瑜", rarity: "UR", chance: 0.375, image: "images/UR6.png" },
+                    { id: "c32", name: "【UR】期間限定・娜璉", rarity: "UR", chance: 0.375, image: "images/UR7.png" },
+                    { id: "c7", name: "【SSR】全圖洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR1.jpg" },
+                    { id: "c8", name: "【SSR】異色洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR2.jpg" },
+                    { id: "c9", name: "【SSR】浮雕洛奇亞", rarity: "SSR", chance: 1.5, image: "images/SSR3.jpg" },
+                    { id: "c10", name: "【SSR】全圖鳳王", rarity: "SSR", chance: 1.5, image: "images/SSR4.jpg" },
+                    { id: "c11", name: "【SSR】三分神射・Curry", rarity: "SSR", chance: 1.5, image: "images/SC_SSR.png" },
+                    { id: "c12", name: "【SSR】死神・KD", rarity: "SSR", chance: 1.5, image: "images/KD_SSR.png" },
+                    { id: "c13", name: "【SR】洛奇亞ex", rarity: "SR", chance: 3.0, image: "images/SR1.jpg" },
+                    { id: "c14", name: "【SR】鳳王ex", rarity: "SR", chance: 3.0, image: "images/SR2.jpg" },
+                    { id: "c15", name: "【SR】浴火狀元・康寧漢", rarity: "SR", chance: 3.0, image: "images/CC_SR.png" },
+                    { id: "c16", name: "【SR】鬍鬚張・哈登", rarity: "SR", chance: 3.0, image: "images/JH_SR.png" },
+                    { id: "c17", name: "【SR】城堡哥・Stephon Castle", rarity: "SR", chance: 3.0, image: "images/SC_SR.png" },
+                    { id: "c18", name: "【R】洛奇亞", rarity: "R", chance: 4.0, image: "images/R1.jpg" },
+                    { id: "c19", name: "【R】鳳王", rarity: "R", chance: 4.0, image: "images/R2.jpg" },
+                    { id: "c20", name: "【R】NBA陳奕迅・Tuner", rarity: "R", chance: 4.0, image: "images/MT_R.png" },
+                    { id: "c21", name: "【R】拳王・追夢綠", rarity: "R", chance: 4.0, image: "images/DG_R.png" },
+                    { id: "c22", name: "【R】泳池派密・普爾", rarity: "R", chance: 4.0, image: "images/JP_R.png" },
+                    { id: "c23", name: "【R】冷凍王・苦命家", rarity: "R", chance: 4.0, image: "images/JK_R.png" },
+                    { id: "c24", name: "【N】小山豬", rarity: "N", chance: 7.0, image: "images/N1.jpg", synthTarget: "c_sp1" },
+                    { id: "c25", name: "【N】阿羅拉小拳石", rarity: "N", chance: 7.0, image: "images/N2.jpg", synthTarget: "c_sp1" },
+                    { id: "c26", name: "【N】小火龍", rarity: "N", chance: 7.0, image: "images/N3.jpg", synthTarget: "c_sp1" },
+                    { id: "c27", name: "【N】阿羅拉烏波", rarity: "N", chance: 7.0, image: "images/N4.jpg", synthTarget: "c_sp1" },
+                    { id: "c28", name: "【N】愛吃豚", rarity: "N", chance: 7.0, image: "images/N5.jpg", synthTarget: "c_sp1" },
+                    { id: "c29", name: "【N】原野水母", rarity: "N", chance: 7.0, image: "images/N6.jpg", synthTarget: "c_sp1" },
+                    { id: "c30", name: "【N】光蚵仔", rarity: "N", chance: 7.0, image: "images/N7.jpg", synthTarget: "c_sp1" }
                 ]
             }
         };
-        // ==========================================
-        // 系統變數與遊戲邏輯
-        // ==========================================
+
+        // 🧠 15 題動態隨機題庫產生器 (前5題：電容並聯，中5題：電容串聯，後5題：Q=CV公式練習)
+        let quizData = {};
+
+        function generateRandomParallelQuiz() {
+            quizData = {};
+            const capValues = [10, 22, 47, 100, 220, 330, 470]; // 常見 uF 數值
+            const voltages = [5, 10, 12, 24, 50]; // 常見電壓 V
+
+            for (let i = 1; i <= 15; i++) {
+                let qId = `q${i}`;
+                let nextQId = i === 15 ? "end" : `q${i + 1}`;
+                let helpId = `q${i}_help`;
+
+                if (i <= 5) {
+                    // 前 5 題：電容並聯總電容量計算 (Ct = C1 + C2)
+                    let c1 = capValues[Math.floor(Math.random() * capValues.length)];
+                    let c2 = capValues[Math.floor(Math.random() * capValues.length)];
+                    let ct = c1 + c2;
+
+                    let wrongs = [];
+                    while (wrongs.length < 3) {
+                        let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 10 : -10);
+                        let fakeCt = ct + offset;
+                        if (fakeCt !== ct && fakeCt > 0 && !wrongs.includes(fakeCt)) {
+                            wrongs.push(fakeCt);
+                        }
+                    }
+
+                    quizData[qId] = {
+                        tag: `電容特訓 第 ${i}/15 題 (並聯)`,
+                        text: `若有兩個電容 $C_1 = ${c1}\\,\\mu\\text{F}$ 與 $C_2 = ${c2}\\,\\mu\\text{F}$ 並聯連接，請問其等效總電容量 $C_T$ 為多少？`,
+                        options: [
+                            { text: `${ct} $\\mu\\text{F}$`, next: nextQId, isCorrect: true },
+                            { text: `${wrongs[0]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯：電容並聯公式應為相加 (C1 + C2)` },
+                            { text: `${wrongs[1]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯` },
+                            { text: `${wrongs[2]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯` }
+                        ]
+                    };
+
+                    quizData[helpId] = {
+                        tag: `救援：電容並聯計算 第 ${i} 題`,
+                        text: `【提示】電容並聯的總電容量計算方式與電阻串聯相同，直接將各電容相加：$C_T = C_1 + C_2 = ${c1} + ${c2} = ${ct}\\,\\mu\\text{F}$。`,
+                        aiPrompt: `請幫我解釋為什麼電容並聯時總電容量是直接相加 ($C_T = C_1 + C_2$)，並舉例說明當 C1 = ${c1} uF、C2 = ${c2} uF 時的計算方式。`,
+                        aiUrl: "https://gemini.google.com/",
+                        options: [
+                            { text: `${ct} $\\mu\\text{F}$`, next: nextQId, isCorrect: true },
+                            { text: `小於 ${Math.min(c1, c2)} $\\mu\\text{F}$`, next: helpId, log: `第${i}題救援失敗：誤以為電容並聯會變小` }
+                        ]
+                    };
+
+                } else if (i > 5 && i <= 10) {
+                    // 中 5 題：電容串聯總電容量計算 (Ct = (C1 * C2) / (C1 + C2))
+                    let c1 = capValues[Math.floor(Math.random() * capValues.length)];
+                    let c2 = capValues[Math.floor(Math.random() * capValues.length)];
+                    let ctExact = (c1 * c2) / (c1 + c2);
+                    let ct = Number(ctExact.toFixed(1));
+
+                    let wrongs = [];
+                    while (wrongs.length < 3) {
+                        let offset = (Math.random() * 10 - 5);
+                        let fakeCt = Number((ct + offset).toFixed(1));
+                        if (fakeCt !== ct && fakeCt > 0 && !wrongs.includes(fakeCt)) {
+                            wrongs.push(fakeCt);
+                        }
+                    }
+
+                    quizData[qId] = {
+                        tag: `電容特訓 第 ${i}/15 題 (串聯)`,
+                        text: `若有兩個電容 $C_1 = ${c1}\\,\\mu\\text{F}$ 與 $C_2 = ${c2}\\,\\mu\\text{F}$ 串聯連接，請問其等效總電容量 $C_T$ 約為多少？`,
+                        options: [
+                            { text: `${ct} $\\mu\\text{F}$`, next: nextQId, isCorrect: true },
+                            { text: `${wrongs[0]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯：電容串聯公式應為倒數和或 $\\frac{C_1 C_2}{C_1 + C_2}$` },
+                            { text: `${wrongs[1]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯` },
+                            { text: `${wrongs[2]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯` }
+                        ]
+                    };
+
+                    quizData[helpId] = {
+                        tag: `救援：電容串聯計算 第 ${i} 題`,
+                        text: `【提示】兩電容串聯的總電容量計算方式與電阻並聯相同：$C_T = \\frac{C_1 \\times C_2}{C_1 + C_2} = \\frac{${c1} \\times ${c2}}{${c1} + ${c2}} \\approx ${ct}\\,\\mu\\text{F}$。串聯後總電容量必小於任一分電容！`,
+                        aiPrompt: `請幫我詳細說明當 C1 = ${c1} uF、C2 = ${c2} uF 串聯時，如何計算總電容量，並解釋倒數和的概念。`,
+                        aiUrl: "https://gemini.google.com/",
+                        options: [
+                            { text: `${ct} $\\mu\\text{F}$`, next: nextQId, isCorrect: true },
+                            { text: `大於 ${Math.max(c1, c2)} $\\mu\\text{F}$`, next: helpId, log: `第${i}題救援失敗：誤以為電容串聯會變大` }
+                        ]
+                    };
+
+                } else {
+                    // 後 5 題：Q = CV 公式練習 (隨機抽一種題型：求 Q, 求 C, 或求 V)
+                    let type = Math.floor(Math.random() * 3); // 0: 求Q, 1: 求C, 2: 求V
+                    
+                    if (type === 0) {
+                        let c = capValues[Math.floor(Math.random() * capValues.length)];
+                        let v = voltages[Math.floor(Math.random() * voltages.length)];
+                        let qVal = c * v; // uF * V = uC
+                        
+                        let wrongs = [];
+                        while (wrongs.length < 3) {
+                            let offset = (Math.floor(Math.random() * 5) + 1) * 10;
+                            let fakeQ = qVal + (Math.random() < 0.5 ? offset : -offset);
+                            if (fakeQ !== qVal && fakeQ > 0 && !wrongs.includes(fakeQ)) {
+                                wrongs.push(fakeQ);
+                            }
+                        }
+
+                        quizData[qId] = {
+                            tag: `Q=CV練習 第 ${i}/15 题 (求電荷量Q)`,
+                            text: `有一電容 $C = ${c}\\,\\mu\\text{F}$，若跨壓 $V = ${v}\\;\\text{V}$，請問其儲存的電荷量 $Q$ 為多少？`,
+                            options: [
+                                { text: `${qVal} $\\mu\\text{C}$`, next: nextQId, isCorrect: true },
+                                { text: `${wrongs[0]} $\\mu\\text{C}$`, next: helpId, log: `第${i}題錯：Q = C × V 計算錯誤` },
+                                { text: `${wrongs[1]} $\\mu\\text{C}$`, next: helpId, log: `第${i}題錯` },
+                                { text: `${wrongs[2]} $\\mu\\text{C}$`, next: helpId, log: `第${i}題錯` }
+                            ]
+                        };
+
+                        quizData[helpId] = {
+                            tag: `救援：Q=CV公式應用 第 ${i} 題`,
+                            text: `【提示】根據電容電荷公式 $Q = C \\times V$，當 $C = ${c}\\,\\mu\\text{F}$ 且 $V = ${v}\\;\\text{V}$ 時，$Q = ${c} \\times ${v} = ${qVal}\\,\\mu\\text{C}$。`,
+                            aiPrompt: `請幫我解說電容公式 Q = CV 的意義，並說明當 C = ${c} uF、V = ${v} V 時如何算出 Q = ${qVal} uC。`,
+                            aiUrl: "https://gemini.google.com/",
+                            options: [
+                                { text: `${qVal} $\\mu\\text{C}$`, next: nextQId, isCorrect: true },
+                                { text: `${qVal * 2} $\\mu\\text{C}$`, next: helpId, log: `第${i}題救援失敗：公式計算錯誤` }
+                            ]
+                        };
+
+                    } else if (type === 1) {
+                        let c = capValues[Math.floor(Math.random() * capValues.length)];
+                        let v = voltages[Math.floor(Math.random() * voltages.length)];
+                        let qVal = c * v; // uC
+
+                        let wrongs = [];
+                        while (wrongs.length < 3) {
+                            let offset = [10, 22, 47][Math.floor(Math.random() * 3)];
+                            let fakeC = c + (Math.random() < 0.5 ? offset : -offset);
+                            if (fakeC !== c && fakeC > 0 && !wrongs.includes(fakeC)) {
+                                wrongs.push(fakeC);
+                            }
+                        }
+
+                        quizData[qId] = {
+                            tag: `Q=CV練習 第 ${i}/15 題 (求電容量C)`,
+                            text: `某一電容儲存之電荷量 $Q = ${qVal}\\,\\mu\\text{C}$，當其兩端電壓 $V = ${v}\\;\\text{V}$ 時，請問其電容量 $C$ 為多少？`,
+                            options: [
+                                { text: `${c} $\\mu\\text{F}$`, next: nextQId, isCorrect: true },
+                                { text: `${wrongs[0]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯：C = Q / V 計算錯誤` },
+                                { text: `${wrongs[1]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯` },
+                                { text: `${wrongs[2]} $\\mu\\text{F}$`, next: helpId, log: `第${i}題錯` }
+                            ]
+                        };
+
+                        quizData[helpId] = {
+                            tag: `救援：Q=CV公式應用 第 ${i} 題`,
+                            text: `【提示】由公式 $Q = C \\times V$ 可推導出 $C = \\frac{Q}{V} = \\frac{${qVal}}{${v}} = ${c}\\,\\mu\\text{F}$。`,
+                            aiPrompt: `請說明如何由 Q = CV 推導出 C = Q/V，並示範當 Q = ${qVal} uC、V = ${v} V 時如何算出 C = ${c} uF。`,
+                            aiUrl: "https://gemini.google.com/",
+                            options: [
+                                { text: `${c} $\\mu\\text{F}$`, next: nextQId, isCorrect: true },
+                                { text: `${c * 2} $\\mu\\text{F}$`, next: helpId, log: `第${i}題救援失敗：公式變形計算錯誤` }
+                            ]
+                        };
+
+                    } else {
+                        let c = capValues[Math.floor(Math.random() * capValues.length)];
+                        let v = voltages[Math.floor(Math.random() * voltages.length)];
+                        let qVal = c * v; // uC
+
+                        let wrongs = [];
+                        while (wrongs.length < 3) {
+                            let offset = [5, 10, 15][Math.floor(Math.random() * 3)];
+                            let fakeV = v + (Math.random() < 0.5 ? offset : -offset);
+                            if (fakeV !== v && fakeV > 0 && !wrongs.includes(fakeV)) {
+                                wrongs.push(fakeV);
+                            }
+                        }
+
+                        quizData[qId] = {
+                            tag: `Q=CV練習 第 ${i}/15 題 (求電壓V)`,
+                            text: `電容量 $C = ${c}\\,\\mu\\text{F}$ 的電容，當其儲存電荷量 $Q = ${qVal}\\,\\mu\\text{C}$ 時，請問其兩端電壓 $V$ 為多少？`,
+                            options: [
+                                { text: `${v} $\\text{V}$`, next: nextQId, isCorrect: true },
+                                { text: `${wrongs[0]} $\\text{V}$`, next: helpId, log: `第${i}題錯：V = Q / C 計算錯誤` },
+                                { text: `${wrongs[1]} $\\text{V}$`, next: helpId, log: `第${i}題錯` },
+                                { text: `${wrongs[2]} $\\text{V}$`, next: helpId, log: `第${i}題錯` }
+                            ]
+                        };
+
+                        quizData[helpId] = {
+                            tag: `救援：Q=CV公式應用 第 ${i} 題`,
+                            text: `【提示】由公式 $Q = C \\times V$ 可推導出 $V = \\frac{Q}{C} = \\frac{${qVal}}{${c}} = ${v}\\;\\text{V}$。`,
+                            aiPrompt: `請說明如何由 Q = CV 推導出 V = Q/C，並示範當 Q = ${qVal} uC、C = ${c} uF 時如何算出 V = ${v} V。`,
+                            aiUrl: "https://gemini.google.com/",
+                            options: [
+                                { text: `${v} $\\text{V}$`, next: nextQId, isCorrect: true },
+                                { text: `${v + 10} $\\text{V}$`, next: helpId, log: `第${i}題救援失敗：公式變形計算錯誤` }
+                            ]
+                        };
+                    }
+                }
+            }
+            quizData["end"] = { tag: "結束", text: "" };
+        }
+
         let studentName = "";
         let currentStep = "q1"; 
-        let hp = 30; // 🩸 放寬血量：30題給30滴血
-        let currentStreak = 0; // 🔥 連擊計算器
+        let hp = 30; 
+        let currentStreak = 0; 
         let diagnosticLogs = [];
         let sessionCards = []; 
         let failedQuestions = []; 
-        let startTime = 0;           
-        let totalTime = 0;           
+        let startTime = 0;            
+        let totalTime = 0;            
         let rescueTriggered = 0;     
         let rescueFails = 0;
-	let isTransitioning = false; // 🚨 新增這行：防連點的鎖定開關
+        let aiCopyCount = 0; 
+        let isTransitioning = false; 
+        let currentPackId = "phase2"; 
 
+        document.addEventListener('DOMContentLoaded', () => {
+            initPackSelector();
+        });
 
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwQnum1bAGvOb-dv5hL08S0pzMB93_gN0ZmoqCQtUjKFYOT-vs8Df0iTT6OMpx_sb6pjg/exec';
+        function initPackSelector() {
+            const selector = document.getElementById('pack-selector');
+            if (!selector) return;
+            selector.innerHTML = '';
+            
+            Object.keys(cardPacks).forEach(key => {
+                if (cardPacks[key] && cardPacks[key].cards) {
+                    const div = document.createElement('div');
+                    div.className = `pack-option ${key === currentPackId ? 'active' : ''}`;
+                    div.innerText = cardPacks[key].name;
+                    div.onclick = function() {
+                        selectPack(key, this);
+                    };
+                    selector.appendChild(div);
+                }
+            });
+        }
+
+        function selectPack(packId, el) {
+            currentPackId = packId;
+            document.querySelectorAll('.pack-option').forEach(opt => opt.classList.remove('active'));
+            el.classList.add('active');
+        }
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -862,59 +694,90 @@
         }
 
         function openCollection() {
-            let inputName = document.getElementById('student-name').value.trim();
+            let inputName = document.getElementById('student-name').value.replace(/\s+/g, '');
             if(!inputName) { alert("請先輸入姓名！"); return; }
             
             let storageKey = "gachaCollection_" + inputName;
             let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
             
-            let normalPool = cardPool.filter(c => c.chance > 0);
-            let uniqueCount = normalPool.filter(mc => pastCollection.some(pc => pc.id === mc.id)).length;
-            let totalCount = normalPool.length;
-            document.getElementById('collection-title').innerText = `🏆 ${inputName} 的圖鑑 (${uniqueCount} / ${totalCount})`;
+            let totalUnique = 0;
+            let totalCards = 0;
             
-            let grid = document.getElementById('collection-grid');
-            grid.innerHTML = "";
+            let contentArea = document.getElementById('collection-content');
+            contentArea.innerHTML = "";
             
-            cardPool.forEach(masterCard => {
-                let ownedCard = pastCollection.find(c => c.id === masterCard.id);
-                if (masterCard.chance === 0 && !ownedCard) return; 
+            Object.keys(cardPacks).forEach(packKey => {
+                const pack = cardPacks[packKey];
+                let packNormalPool = pack.cards.filter(c => c.chance > 0);
+                if (packNormalPool.length === 0) return;
 
-                if (ownedCard) {
-                    let synthHtml = "";
-                    if (masterCard.rarity === "N" && ownedCard.count >= 5) {
-                        synthHtml = `<button class="btn-synth" onclick="synthesizeCard('${masterCard.id}')">✨ 5合1 覺醒</button>`;
+                totalCards += packNormalPool.length;
+                let packUnique = packNormalPool.filter(mc => pastCollection.some(pc => pc.id === mc.id)).length;
+                totalUnique += packUnique;
+                
+                contentArea.innerHTML += `<div class="pack-section-title">${pack.name} (${packUnique}/${packNormalPool.length})</div>`;
+                
+                let gridHtml = `<div class="card-grid">`;
+                pack.cards.forEach(masterCard => {
+                    let ownedCard = pastCollection.find(c => c.id === masterCard.id);
+                    if (ownedCard) {
+                        let synthHtml = "";
+                        if (masterCard.synthTarget && ownedCard.count >= 5) {
+                            let btnClass = masterCard.rarity === "SR" ? "btn-synth btn-synth-sr" : "btn-synth";
+                            let btnIcon = masterCard.rarity === "SR" ? "🔥" : "✨";
+                            synthHtml = `<button class="${btnClass}" onclick="synthesizeCard('${masterCard.id}', '${masterCard.synthTarget}')">${btnIcon} 5合1 覺醒</button>`;
+                        }
+
+                        gridHtml += `
+                            <div class="mini-card">
+                                <div class="count">x${ownedCard.count}</div>
+                                <img src="${masterCard.image}" alt="${masterCard.name}">
+                                <div class="name">${masterCard.name}</div>
+                                ${synthHtml}
+                            </div>`;
+                    } else {
+                        gridHtml += `
+                            <div class="mini-card unowned">
+                                <div style="width: 100%; aspect-ratio: 1/1; background: #1a1a2e; border-radius: 5px; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; color: #7f8c8d; font-size: 32px; font-weight: bold; border: 1px dashed #34495e;">?</div>
+                                <div class="name" style="color: #5d6d7e;">${masterCard.name}</div>
+                                <div style="font-size: 11px; color: #e74c3c; margin-top: 4px;">🔒 尚未獲得</div>
+                            </div>`;
                     }
-                    grid.innerHTML += `
-                        <div class="mini-card">
-                            <div class="count">x${ownedCard.count}</div>
-                            <img src="${masterCard.image}" alt="${masterCard.name}">
-                            <div class="name">${masterCard.name}</div>
-                            ${synthHtml}
-                        </div>`;
-                } else {
-                    grid.innerHTML += `
-                        <div class="mini-card unowned">
-                            <img src="${masterCard.image}" alt="???">
-                            <div class="name">【???】未知卡片</div>
-                        </div>`;
-                }
+                });
+                gridHtml += `</div>`;
+                contentArea.innerHTML += gridHtml;
             });
+
+            document.getElementById('collection-title').innerText = `🏆 ${inputName} 的圖鑑 (${totalUnique} / ${totalCards})`;
             document.getElementById('collection-modal').style.display = "flex";
         }
 
-        function synthesizeCard(nCardId) {
-            let inputName = document.getElementById('student-name').value.trim();
+        function synthesizeCard(materialId, targetSpId) {
+            let inputName = document.getElementById('student-name').value.replace(/\s+/g, '');
             let storageKey = "gachaCollection_" + inputName;
             let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
 
-            let nCardIndex = pastCollection.findIndex(c => c.id === nCardId);
-            if (nCardIndex > -1 && pastCollection[nCardIndex].count >= 5) {
-                pastCollection[nCardIndex].count -= 5;
-                let spCardId = "c_sp1"; 
-                let spMaster = cardPool.find(c => c.id === spCardId);
-                let spCardIndex = pastCollection.findIndex(c => c.id === spCardId);
-                
+            let materialIndex = pastCollection.findIndex(c => c.id === materialId);
+            if (materialIndex > -1 && pastCollection[materialIndex].count >= 5) {
+                let spMaster = null;
+                for (let packKey in cardPacks) {
+                    let found = cardPacks[packKey].cards.find(c => c.id === targetSpId);
+                    if (found) { spMaster = found; break; }
+                }
+                if (!spMaster) return;
+
+                if (spMaster.pblTask && spMaster.unlockCode) {
+                    let userInput = prompt(`🛑 傳說覺醒任務觸發！🛑\n\n${spMaster.pblTask}\n\n(任務完成後，請向老師索取通關密碼，並輸入於下方：)`);
+                    if (userInput === null) return; 
+                    else if (userInput.trim() !== spMaster.unlockCode) {
+                        alert("❌ 密碼錯誤！請確認你已經確實完成任務，並向老師取得正確密碼！");
+                        playSound('wrong');
+                        return; 
+                    }
+                }
+
+                pastCollection[materialIndex].count -= 5;
+                let spCardIndex = pastCollection.findIndex(c => c.id === targetSpId);
                 if (spCardIndex > -1) { pastCollection[spCardIndex].count += 1; } 
                 else { pastCollection.push({ ...spMaster, count: 1 }); }
                 
@@ -957,8 +820,20 @@
         function closeCollection() { document.getElementById('collection-modal').style.display = "none"; }
 
         function startGame() {
-            studentName = document.getElementById('student-name').value.trim();
+            studentName = document.getElementById('student-name').value.replace(/\s+/g, '');
             if (!studentName) { alert("請先輸入姓名喔！"); return; }
+            
+            generateRandomParallelQuiz();
+            currentStep = "q1";
+            hp = 30;
+            currentStreak = 0;
+            diagnosticLogs = [];
+            sessionCards = [];
+            failedQuestions = [];
+            rescueTriggered = 0;
+            rescueFails = 0;
+            aiCopyCount = 0;
+
             startTime = Date.now();
             initAudio(); 
             document.getElementById('student-setup').style.display = 'none';
@@ -968,10 +843,15 @@
         }
 
         function renderQuestion() {
+            isTransitioning = false; 
+            if (currentStep === "end" || !quizData[currentStep]) {
+                finishGame();
+                return;
+            }
 
-	isTransitioning = false; // 🚨 新增這行：題目載入完成，解鎖按鈕
-            if (currentStep === "end") { finishGame(); return; }
             const q = quizData[currentStep];
+            if(!q) { finishGame(); return; }
+
             document.getElementById('q-tag').innerText = q.tag;
             document.getElementById('q-text').innerHTML = q.text;
 
@@ -980,11 +860,60 @@
                 document.body.classList.add('rescue-mode'); 
             } else {
                 document.body.classList.remove('rescue-mode'); 
-                if (q.tag.includes("流行") || q.tag.includes("放鬆") || q.tag.includes("時間")) {
-                    document.getElementById('q-tag').style.background = "#27ae60"; 
-                } else {
-                    document.getElementById('q-tag').style.background = "#e74c3c"; 
-                }
+                document.getElementById('q-tag').style.background = "#e74c3c"; 
+            }
+
+            const oldAiBox = document.getElementById('ai-assistant-box');
+            if (oldAiBox) oldAiBox.remove();
+
+            if (q.aiPrompt) {
+                const aiBox = document.createElement('div');
+                aiBox.id = 'ai-assistant-box';
+                aiBox.style = "background: #16213e; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #3498db; text-align: left;";
+                
+                let safeUrl = q.aiUrl || "https://gemini.google.com/";
+                
+                aiBox.innerHTML = `
+                    <div style="color: #3498db; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🤖 AI 戰術教練線上應援：</div>
+                    <div style="font-size: 13px; color: #cbd5e1; background: #1a1a2e; padding: 10px; border-radius: 5px; max-height: 80px; overflow-y: auto; margin-bottom: 10px; border: 1px solid #2c3e50;">${q.aiPrompt}</div>
+                    <button class="btn" style="background: #e67e22; box-shadow: 0 4px #b35d10; padding: 10px; font-size: 15px; margin-bottom: 0;" id="ai-action-btn">
+                        📋 複製戰術秘笈並向 Gemini 請教外掛
+                    </button>
+                    <div id="ai-timer-msg" style="color: #e74c3c; font-size: 13px; font-weight: bold; margin-top: 8px; text-align: center; display: none;"></div>
+                `;
+                document.getElementById('game-area').insertBefore(aiBox, document.getElementById('options-area'));
+
+                aiBox.querySelector('#ai-action-btn').addEventListener('click', function(e) {
+                    if (this.classList.contains('is-active')) return;
+                    this.classList.add('is-active');
+
+                    handleAiAssist(q.aiPrompt, safeUrl);
+
+                    const optionsArea = document.getElementById('options-area');
+                    const originalButtons = optionsArea.querySelectorAll('button');
+                    originalButtons.forEach(b => b.disabled = true);
+                    
+                    this.disabled = true;
+                    this.style.background = "#7f8c8d";
+                    this.style.boxShadow = "none";
+
+                    let timeLeft = 30;
+                    const timerMsg = document.getElementById('ai-timer-msg');
+                    timerMsg.style.display = "block";
+
+                    const countdown = setInterval(() => {
+                        timerMsg.innerText = `🚨 AI 教練正在傳授破解戰術... 請研讀上方提示，${timeLeft} 秒後解鎖作答按鈕！`;
+                        timeLeft--;
+
+                        if (timeLeft < 0) {
+                            clearInterval(countdown);
+                            timerMsg.style.color = "#2ecc71";
+                            timerMsg.innerText = "✅ 戰術解讀完成！作答通道已解鎖！";
+                            originalButtons.forEach(b => b.disabled = false);
+                            aiCopyCount++; 
+                        }
+                    }, 1000);
+                });
             }
 
             const optionsArea = document.getElementById('options-area');
@@ -998,22 +927,41 @@
                 const btn = document.createElement('button');
                 btn.className = 'btn';
                 let cleanText = opt.text.replace(/^[A-D]\.\s*/, "");
-                btn.innerText = `${labels[index]}. ${cleanText}`;
-                // 🔥 將點擊事件改為傳遞 handleAnswer，判斷邏輯全部移交內部
+                btn.innerHTML = `${labels[index]}. ${cleanText}`;
                 btn.onclick = () => handleAnswer(opt);
                 optionsArea.appendChild(btn);
             });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('game-area')]).catch((err) => console.log(err.message));
+            }
         }
 
         function handleAnswer(selectedOption) {
-	if (isTransitioning) return; 
-            isTransitioning = true; // 立刻上鎖
+            if (isTransitioning) return; 
+            isTransitioning = true; 
             let isRescueQuestion = currentStep.includes("_help"); 
 
             if (!selectedOption.isCorrect) {
                 playSound('wrong'); 
-                hp--; if(hp < 0) hp = 0; 
-                currentStreak = 0; // 🚨 答錯斷連擊
+                
+                let storageKey = "gachaCollection_" + studentName;
+                let pastCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+                let aiShieldIndex = pastCollection.findIndex(c => c.id === "p2_ai" && c.count > 0);
+
+                if (aiShieldIndex > -1) {
+                    pastCollection[aiShieldIndex].count--;
+                    localStorage.setItem(storageKey, JSON.stringify(pastCollection));
+                    alert("🛡️ 戰術護盾觸發！消耗 1 張【AI 戰術教練卡】，本次答錯免扣血（HP 保留）！");
+                    
+                    let totalOwned = pastCollection.reduce((sum, c) => sum + c.count, 0);
+                    document.getElementById('inventory-display').innerText = `🎒 本局卡簿: ${totalOwned} 張`;
+                } else {
+                    hp--; 
+                    if(hp < 0) hp = 0; 
+                }
+
+                currentStreak = 0; 
                 updateStatus();
                 if (selectedOption.log) diagnosticLogs.push(selectedOption.log);
                 
@@ -1026,12 +974,10 @@
 
                 currentStep = selectedOption.next;
                 renderQuestion();
-            } 
-            else {
+            } else {
                 playSound('correct'); 
                 showCorrectSplash();  
                 
-                // 💡 在「非救援題」答對，且之前沒死過，連擊數才 +1
                 if (!isRescueQuestion && !failedQuestions.includes(currentStep)) {
                     currentStreak++;
                 }
@@ -1039,15 +985,17 @@
                 setTimeout(() => {
                     let nextStep = selectedOption.next;
                     
-                    // 🔥 檢查是否達成 2 連擊
                     if (currentStreak >= 2) {
-                        currentStreak = 0; // 抽卡後歸零
-                        currentStep = nextStep;
-                        document.getElementById('gacha-title').innerText = "🔥 二連擊達成！獲得抽卡機會！ ✨";
+                        currentStreak = 0;
+                        currentStep = nextStep; 
                         prepareGacha(); 
                     } else {
-                        currentStep = nextStep;
-                        renderQuestion();
+                        currentStep = nextStep; 
+                        if (currentStep === "end") {
+                            finishGame();
+                        } else {
+                            renderQuestion();
+                        }
                     }
                     updateStatus();
                 }, 800);
@@ -1061,7 +1009,7 @@
         }
 
         function updateStatus() {
-            let hpText = hp > 10 ? `❤️❤️ x ${hp}` : "❤️".repeat(hp);
+            let hpText = hp > 10 ? `❤️ x ${hp}` : "❤️".repeat(hp);
             document.getElementById('hearts').innerText = hpText;
             document.getElementById('streak-display').innerText = `🔥 連擊: ${currentStreak} / 2`;
         }
@@ -1083,7 +1031,14 @@
 
         function drawCard() {
             const cardObj = document.getElementById('revealed-card');
-            let drawablePool = cardPool.filter(c => c.chance > 0);
+            
+            if (!cardPacks[currentPackId] || cardPacks[currentPackId].cards.length === 0) {
+                currentPackId = "phase1";
+            }
+            
+            let currentPool = cardPacks[currentPackId].cards;
+            let drawablePool = currentPool.filter(c => c.chance > 0);
+            
             let randomNum = Math.random() * 100;
             let currentLimit = 0;
             let resultCard = drawablePool[drawablePool.length - 1]; 
@@ -1118,25 +1073,59 @@
         }
 
         function finishGame() {
+            let storageKey = "gachaCollection_" + studentName;
+            let currentCollection = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+            if (hp === 30 && failedQuestions.length === 0) {
+                let godCardMaster = null;
+                for (let key in cardPacks) {
+                    let found = cardPacks[key].cards.find(c => c.id === "c_sp1");
+                    if (found) { godCardMaster = found; break; }
+                }
+                
+                if (godCardMaster) {
+                    let existingGodCard = currentCollection.find(c => c.id === "c_sp1");
+                    if (existingGodCard) {
+                        existingGodCard.count += 1;
+                        alert("🏆 完美通關！【SP】神卡數量已累積 +1！");
+                    } else {
+                        currentCollection.push({ ...godCardMaster, count: 1 });
+                        alert("🏆 恭喜你達成完美零誤差通關！專屬隱藏神卡已存入你的圖鑑！");
+                    }
+                }
+            }
+
+            localStorage.setItem(storageKey, JSON.stringify(currentCollection));
             document.getElementById('game-area').style.display = 'none';
             document.getElementById('result-area').style.display = 'block';
 
             totalTime = Math.round((Date.now() - startTime) / 1000);
 
             let reportArea = document.getElementById('log-report');
-            let finalScoreText = `血量剩餘：${hp}\n🕒 耗時：${totalTime} 秒\n🏀 本局共獲得 ${sessionCards.length} 張卡片\n\n`;
-            let logText = diagnosticLogs.length === 0 ? "🌟 完美通關，基礎極度扎實！" : "⚠️ 盲點診斷 (請老師留意)：\n" + diagnosticLogs.join("\n");
+            let logText = diagnosticLogs.length === 0 ? "🌟 完美通關，電容與Q=CV計算概念極度扎實！" : "⚠️ 盲點診斷 (請老師留意)：\n" + diagnosticLogs.join("\n");
             
+            let finalScoreText = `血量剩餘：${hp}\n🕒 耗時：${totalTime} 秒\n🏀 本局共獲得 ${sessionCards.length} 張卡片\n\n`;
             reportArea.innerText = finalScoreText + logText;
 
             let itemsText = sessionCards.length > 0 ? sessionCards.join(",") : "無";
+
             sendDataToSheet(
-                studentName, hp, totalTime, rescueTriggered, rescueFails, 
-                diagnosticLogs.length, diagnosticLogs.join(" | "), itemsText
+                studentName, 
+                hp, 
+                totalTime, 
+                rescueTriggered, 
+                rescueFails, 
+                diagnosticLogs.length, 
+                diagnosticLogs.join(" | "), 
+                itemsText,
+                "電容與Q=CV隨機特訓"
             );
         }
-
-        function sendDataToSheet(name, hp, time, rescueT, rescueF, errorCount, errorDetails, cards) {
+        
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx7SKmU6_97ZH5HHtB1GObxSaoGTdLPpHtvdW9jLYHMNKu9uwd9ubLQ5Mf6BUuJQNwIhA/exec';
+        
+        function sendDataToSheet(name, hp, time, rescueT, rescueF, errorCount, errorDetails, cards, unitName) {
+            if(!scriptURL) return;
             let formData = new URLSearchParams();
             formData.append('name', name);
             formData.append('hp', hp);
@@ -1146,32 +1135,53 @@
             formData.append('errorCount', errorCount);
             formData.append('errorDetails', errorDetails);
             formData.append('cards', cards);
-            // 🚨 新增：抓取該學生目前的完整圖鑑，轉成文字一起傳到 Google 表單
+            formData.append('unitName', unitName);
+            
             let storageKey = "gachaCollection_" + name;
             let fullCollection = localStorage.getItem(storageKey) || "[]";
             formData.append('fullCollection', fullCollection);
-            fetch(scriptURL, { method: 'POST', body: formData });
+            
+            fetch(scriptURL, { method: 'POST', body: formData }).catch(e=>console.log(e));
         }
-// 🚨 新增：雲端讀檔功能 
-        async function syncCloudData() {
-            let inputName = document.getElementById('student-name').value.trim();
-            if(!inputName) { alert("⚠️ 請先輸入您的姓名，才能尋找雲端存檔喔！"); return; }
 
-            // 讓按鈕顯示載入中，避免重複點擊
+        async function syncCloudData() {
+            let inputName = document.getElementById('student-name').value.replace(/\s+/g, '');
+            if(!inputName) { alert("⚠️ 請先輸入您的姓名，才能尋找雲端存檔喔！"); return; }
+            if(!scriptURL) { alert("⚠️ 尚未設定 Google Sheet 網址，無法同步！"); return; }
+
             let syncBtn = document.getElementById('btn-sync');
             let originalText = syncBtn.innerText;
             syncBtn.innerText = "⏳ 雲端同步中，請稍候...";
             syncBtn.disabled = true;
 
             try {
-                // 向 Google Apps Script 發送 GET 請求讀取資料
-                let response = await fetch(scriptURL + "?name=" + encodeURIComponent(inputName), { method: "GET" });
+                let fetchUrl = scriptURL + "?name=" + encodeURIComponent(inputName) + "&t=" + new Date().getTime();
+                let response = await fetch(fetchUrl, { method: "GET" });
                 let result = await response.json();
 
                 if(result.status === "success") {
-                    // 成功抓到資料，覆蓋掉當前電腦的記憶體
-                    localStorage.setItem("gachaCollection_" + inputName, result.data);
-                    alert("✅ 雲端同步成功！已為您載入最新的圖鑑進度！\n您可以點擊「查看我的圖鑑」確認。");
+                    let cloudDataRaw = result.data;
+                    let cloudData = [];
+                    if (typeof cloudDataRaw === 'string') {
+                        cloudData = JSON.parse(cloudDataRaw);
+                    } else {
+                        cloudData = cloudDataRaw;
+                    }
+                    
+                    let storageKey = "gachaCollection_" + inputName;
+                    let localData = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+                    cloudData.forEach(cloudCard => {
+                        let existing = localData.find(c => c.id === cloudCard.id);
+                        if (existing) {
+                            existing.count = Math.max(existing.count, cloudCard.count); 
+                        } else {
+                            localData.push(cloudCard);
+                        }
+                    });
+
+                    localStorage.setItem(storageKey, JSON.stringify(localData));
+                    alert("✅ 雲端同步成功！已為您載入最新圖鑑進度！\n(系統已自動比對並保留您的最高進度)");
                 } else {
                     alert("🆕 找不到您的雲端存檔。\n如果您是第一次玩，這是正常的，系統將為您建立全新圖鑑！");
                 }
@@ -1179,9 +1189,22 @@
                 alert("❌ 同步失敗，請檢查網路連線或稍後再試。");
                 console.error(e);
             } finally {
-                // 恢復按鈕狀態
                 syncBtn.innerText = originalText;
                 syncBtn.disabled = false;
+            }
+        }
+
+        function handleAiAssist(promptText, targetUrl) {
+            alert("📋 AI 提詞複製成功！\n接下來會自動開啟 Gemini，請直接在對話框「貼上 (Ctrl+V)」送出即可！");
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(promptText).then(() => {
+                    window.open(targetUrl, '_blank');
+                }).catch(err => {
+                    window.open(targetUrl, '_blank');
+                });
+            } else {
+                window.open(targetUrl, '_blank');
             }
         }
     </script>
